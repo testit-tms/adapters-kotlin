@@ -3,3 +3,4 @@ plugins {
 }
 rootProject.name = "adapters-kotlin"
 include("testit-kotlin-commons")
+include("testit-adapter-kotest")

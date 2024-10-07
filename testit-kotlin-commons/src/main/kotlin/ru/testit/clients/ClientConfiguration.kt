@@ -18,14 +18,14 @@ data class ClientConfiguration(
     var automaticUpdationLinksToTestCases: Boolean
 ) {
     constructor(properties: Properties) : this(
-        privateToken_ = properties.getProperty(AppProperties.PRIVATE_TOKEN).toString(),
-        projectId = properties.getProperty(AppProperties.PROJECT_ID).toString(),
-        url = Utils.urlTrim(properties.getProperty(AppProperties.URL).toString()),
-        configurationId = properties.getProperty(AppProperties.CONFIGURATION_ID).toString(),
-        testRunId = properties.getProperty(AppProperties.TEST_RUN_ID).toString(),
-        testRunName = properties.getProperty(AppProperties.TEST_RUN_NAME).toString(),
+        privateToken_ = properties.getProperty(AppProperties.PRIVATE_TOKEN, "null"),
+        projectId = properties.getProperty(AppProperties.PROJECT_ID, "null"),
+        url = Utils.urlTrim(properties.getProperty(AppProperties.URL, "null")),
+        configurationId = properties.getProperty(AppProperties.CONFIGURATION_ID, "null"),
+        testRunId = properties.getProperty(AppProperties.TEST_RUN_ID, "null"),
+        testRunName = properties.getProperty(AppProperties.TEST_RUN_NAME, "null"),
         certValidation = try {
-            val validationCert = properties.getProperty(AppProperties.CERT_VALIDATION).toString()
+            val validationCert = properties.getProperty(AppProperties.CERT_VALIDATION, "null")
             if (validationCert == "null") {
                 "true"
             } else {

@@ -13,29 +13,32 @@ class Converter {
 
     companion object {
 
-        fun testResultToAutoTestPostModel(result: TestResult): AutoTestPostModel {
+        fun testResultToAutoTestPostModel(result: TestResult, projectId: UUID?): AutoTestPostModel {
             val model = AutoTestPostModel(
-                result.externalId!!,
-                UUID.fromString(result.uuid),
-                result.name!!
+                externalId = result.externalId!!,
+                projectId = projectId ?: UUID.fromString(result.uuid),
+                name = result.name!!,
+                description = result.description,
+                classname = result.className,
+                namespace = result.spaceName,
+                title = result.title,
+                links = convertPostLinks(result.linkItems),
+                steps = convertSteps(result.getSteps()),
+                labels = labelsPostConvert(result.labels),
+                shouldCreateWorkItem = result.automaticCreationTestCases,
             )
-
-            model.description = result.description
-            model.classname = result.className
-            model.namespace = result.spaceName
-            model.title = result.title
-            model.links = convertPostLinks(result.linkItems)
-            model.steps = convertSteps(result.getSteps())
-            model.labels = labelsPostConvert(result.labels)
-            model.shouldCreateWorkItem = result.automaticCreationTestCases
-
             return model
         }
-
         fun testResultToAutoTestPutModel(result: TestResult): AutoTestPutModel {
+            return testResultToAutoTestPutModel(result, null, null)
+        }
+
+        fun testResultToAutoTestPutModel(result: TestResult,
+                                             projectId: UUID?,
+                                             isFlaky: Boolean?): AutoTestPutModel {
             val model = AutoTestPutModel(
                 externalId = result.externalId!!,
-                projectId = UUID.fromString(result.uuid),
+                projectId = projectId ?: UUID.fromString(result.uuid),
                 description = result.description,
                 name = result.name!!,
                 classname = result.className,
@@ -45,13 +48,18 @@ class Converter {
                 steps = convertSteps(result.getSteps()),
                 labels = labelsPostConvert(result.labels),
                 setup = ArrayList(),
-                teardown = ArrayList()
+                teardown = ArrayList(),
+                isFlaky = isFlaky
+
             )
             return model
         }
 
 
-        fun testResultToTestResultUpdateModel(result: TestResultModel): TestResultUpdateModel {
+        fun testResultToTestResultUpdateModel(result: TestResultModel,
+                                              setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
+                                              teardownResults: List<AttachmentPutModelAutoTestStepResultsModel>?
+        ): TestResultUpdateModel {
             val model = TestResultUpdateModel(
                 duration = result.durationInMs,
                 outcome = result.outcome,
@@ -60,7 +68,9 @@ class Converter {
                 failureClassIds = result.failureClassIds,
                 comment = result.comment,
                 attachments = if (result.attachments != null)
-                    convertAttachmentsFromModel(result.attachments!!) else null
+                    convertAttachmentsFromModel(result.attachments!!) else null,
+                setupResults = setupResults,
+                teardownResults = teardownResults
             )
             return model
         }
@@ -86,27 +96,64 @@ class Converter {
         }
 
         fun autoTestModelToAutoTestPutModel(autoTestModel: AutoTestModel): AutoTestPutModel {
+            return autoTestModelToAutoTestPutModel(autoTestModel, null, null, null, null)
+        }
+
+
+        fun autoTestModelToAutoTestPutModel(autoTestModel: AutoTestModel,
+                                            setup:  List<AutoTestStepModel>?,
+                                            teardown:  List<AutoTestStepModel>?,
+                                            isFlaky: Boolean?): AutoTestPutModel {
+            return autoTestModelToAutoTestPutModel(autoTestModel, null, isFlaky, setup, teardown)
+        }
+
+
+        fun autoTestModelToAutoTestPutModel(autoTestModel: AutoTestModel,
+                                            links: List<LinkPutModel>?,
+                                            isFlaky: Boolean?): AutoTestPutModel {
+            return autoTestModelToAutoTestPutModel(autoTestModel, links, isFlaky, null, null)
+        }
+
+        fun autoTestModelToAutoTestPutModel(autoTestModel: AutoTestModel,
+                                            links: List<LinkPutModel>?,
+                                            isFlaky: Boolean?,
+                                            setup:  List<AutoTestStepModel>?,
+                                            teardown:  List<AutoTestStepModel>?,
+                                            ): AutoTestPutModel {
             val model = AutoTestPutModel(
                 id = autoTestModel.id,
                 externalId = autoTestModel.externalId,
-                links = autoTestModel.links,
+                links = links ?: autoTestModel.links,
                 projectId = autoTestModel.projectId,
                 name = autoTestModel.name,
                 namespace = autoTestModel.namespace,
                 classname = autoTestModel.classname,
                 steps = autoTestModel.steps,
-                setup = autoTestModel.setup,
-                teardown = autoTestModel.teardown,
+                setup = setup ?: autoTestModel.setup,
+                teardown = teardown ?: autoTestModel.teardown,
                 title = autoTestModel.title,
                 description = autoTestModel.description,
                 labels = labelsConvert(autoTestModel.labels!!),
+                isFlaky = isFlaky,
+
             )
             return model
         }
 
-        fun testResultToAutoTestResultsForTestRunModel(result: TestResult): AutoTestResultsForTestRunModel {
+        fun testResultToAutoTestResultsForTestRunModel(result: TestResult, configurationId: UUID?,
+        ): AutoTestResultsForTestRunModel {
+            return testResultToAutoTestResultsForTestRunModel(
+                result, configurationId, null, null)
+        }
+
+        fun testResultToAutoTestResultsForTestRunModel(result: TestResult,
+                                                       configurationId: UUID?,
+                                                       setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
+                                                       teardownResults: List<AttachmentPutModelAutoTestStepResultsModel>?
+        ): AutoTestResultsForTestRunModel {
+            val throwable = result.throwable
             val model = AutoTestResultsForTestRunModel(
-                configurationId = UUID.fromString(result.uuid),
+                configurationId = configurationId ?: UUID.fromString(result.uuid),
                 autoTestExternalId = result.externalId!!,
                 outcome = AvailableTestResultOutcome.valueOf(result.itemStatus?.value!!),
                 links = convertPostLinks(result.resultLinks),
@@ -114,44 +161,39 @@ class Converter {
                 completedOn = dateToOffsetDateTime(result.stop!!),
                 duration = result.stop!! - result.start!!,
                 stepResults = convertResultStep(result.getSteps()),
-                attachments = convertAttachments(result.getAttachments()),
-                message = result.message,
-                parameters = result.parameters
+                attachments = convertAttachments(result.attachments),
+                parameters = result.parameters,
+                message = if (throwable != null) throwable.message else result.message,
+                traces = throwable?.stackTraceToString(),
+                setupResults = setupResults,
+                teardownResults = teardownResults
             )
-//        TODO: with throwable
-//        val throwable = result.throwable
-//        if (throwable != null) {
-//            model.message = throwable.message
-//            model.traces = ExceptionUtils.getStackTrace(throwable)
-//        }
+
             return model
         }
 
         fun convertPostLinks(links: List<LinkItem>): List<LinkPostModel> =
             links.map {
                 val model = LinkPostModel(
-                    it.url!!,
-                    // TODO: check about hasInfo
-                    true
+                    url = it.url,
+                    // TODO: check about hasInfo ?
+                    hasInfo = true,
+                    title = it.title,
+                    description = it.description,
+                    type = LinkType.valueOf(it.type.value)
                 )
-
-                model.title = it.title
-                model.description = it.description
-                model.type = LinkType.valueOf(it.type!!.value)
                 model
             }
 
         fun convertPutLinks(links: List<LinkItem>): List<LinkPutModel> =
             links.map {
                 val model = LinkPutModel(
-                    it.url!!,
-                    true
+                    url = it.url,
+                    hasInfo = true,
+                    title = it.title,
+                    description = it.description,
+                    type = LinkType.valueOf(it.type.value)
                 )
-
-                model.title = it.title
-                model.description = it.description
-                model.type = LinkType.valueOf(it.type!!.value)
-
                 model
             }
 
@@ -206,7 +248,7 @@ class Converter {
             labels.map { LabelPostModel(name = it.name) }
 
         fun labelsPostConvert(labels: List<Label>): List<LabelPostModel> =
-            labels.map { LabelPostModel(name = it.getName()!!) }
+            labels.map { LabelPostModel(name = it.name!!) }
 
         private fun dateToOffsetDateTime(time: Long): OffsetDateTime {
             val date = Date(time)

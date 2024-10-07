@@ -22,6 +22,10 @@ companion object {
 //    }
 
 
+    fun defaultLabels(): MutableList<Label> = mutableListOf()
+    fun genExternalID(fullName: String): String = getHash(fullName)
+    fun defaultLinks(): MutableList<LinkItem> = mutableListOf()
+
     fun extractExternalID(atomicTest: Method, parameters: Map<String, String>): String {
         val annotation = atomicTest.getAnnotation(ExternalId::class.java)
         return if (annotation != null) setParameters(
@@ -45,17 +49,6 @@ companion object {
         return links
     }
 
-    fun extractLabels(atomicTest: Method, parameters: Map<String, String>): List<Label> {
-        val annotation = atomicTest.getAnnotation(Labels::class.java)
-        return if (annotation != null) annotation.value.map {
-            Label().setName(
-                setParameters(
-                    it,
-                    parameters
-                )
-            )
-        } else emptyList()
-    }
 
     fun extractClassname(atomicTest: Method, className: String, parameters: Map<String, String>): String {
         val annotations = listOf(
@@ -97,11 +90,12 @@ companion object {
     }
 
     private fun makeLink(linkAnnotation: Link, parameters: Map<String, String>): LinkItem {
-        return LinkItem()
-            .setTitle(setParameters(linkAnnotation.title, parameters))
-            .setDescription(setParameters(linkAnnotation.description, parameters))
-            .setUrl(setParameters(linkAnnotation.url, parameters))
-            .setType(linkAnnotation.type)
+        return LinkItem(
+            title = setParameters(linkAnnotation.title, parameters),
+            description = setParameters(linkAnnotation.description, parameters),
+            url = setParameters(linkAnnotation.url, parameters),
+            type = linkAnnotation.type
+        )
     }
 
     fun urlTrim(url: String): String {

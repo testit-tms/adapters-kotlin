@@ -1,5 +1,6 @@
 package ru.testit.models
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import ru.testit.services.Utils
 //import kotlinx.serialization.ContextualSerialization
@@ -16,8 +17,8 @@ data class StepResult(
     private var steps: MutableList<StepResult> = mutableListOf(),
     var linkItems: MutableList<LinkItem> = mutableListOf(),
     private var attachments: MutableList<String> = mutableListOf(),
-//    TODO: find fix
-//    var throwable: Throwable = null,
+    @Contextual
+    var throwable: Throwable? = null,
 
     var start: Long? = null,
     var stop: Long? = null,
@@ -49,7 +50,7 @@ data class StepResult(
             append("    steps: ").append(Utils.toIndentedString(this@StepResult.steps)).append("\n")
             append("    linkItems:").append(Utils.toIndentedString(this@StepResult.linkItems)).append("\n")
             append("    attachments:").append(Utils.toIndentedString(this@StepResult.attachments)).append("\n")
-//            append("    throwable:").append(Utils.toIndentedString(this@StepResult.throwable)).append("\n")
+            append("    throwable:").append(Utils.toIndentedString(this@StepResult.throwable)).append("\n")
             append("    start: ").append(Utils.toIndentedString(this@StepResult.start)).append("\n")
             append("    stop: ").append(Utils.toIndentedString(this@StepResult.stop)).append("\n")
             append("    parameters:").append(Utils.toIndentedString(this@StepResult.parameters)).append("\n")

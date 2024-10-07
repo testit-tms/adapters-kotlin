@@ -4,17 +4,17 @@ import kotlinx.serialization.Serializable
 import ru.testit.services.Utils
 
 @Serializable
-class ClassContainer {
-    var uuid: String? = null
-    var name: String? = null
-    val beforeEachTest: MutableList<FixtureResult> = mutableListOf()
-    val afterEachTest: MutableList<FixtureResult> = mutableListOf()
-    val beforeClassMethods: MutableList<FixtureResult> = mutableListOf()
-    val afterClassMethods: MutableList<FixtureResult> = mutableListOf()
-    val children: MutableList<String> = mutableListOf()
-    var start: Long? = null
+data class ClassContainer (
+    var uuid: String? = null,
+    var name: String? = null,
+    val beforeEachTest: MutableList<FixtureResult> = mutableListOf(),
+    val afterEachTest: MutableList<FixtureResult> = mutableListOf(),
+    val beforeClassMethods: MutableList<FixtureResult> = mutableListOf(),
+    val afterClassMethods: MutableList<FixtureResult> = mutableListOf(),
+    val children: MutableList<String> = mutableListOf(),
+    var start: Long? = null,
     var stop: Long? = null
-
+) {
 
 
 

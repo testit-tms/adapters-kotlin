@@ -3,7 +3,6 @@ package ru.testit.listener
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
-// TODO: out of ServiceLoader?
 object ServiceLoaderListener {
     private val logger = LoggerFactory.getLogger(javaClass)
 

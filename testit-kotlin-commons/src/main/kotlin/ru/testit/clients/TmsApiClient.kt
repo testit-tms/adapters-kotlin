@@ -2,11 +2,10 @@ package ru.testit.clients
 
 import org.slf4j.LoggerFactory
 import kotlinx.serialization.Contextual
-import ru.testit.kotlin.client.api.AttachmentsApi
-import ru.testit.kotlin.client.api.AutoTestsApi
-import ru.testit.kotlin.client.api.TestResultsApi
-import ru.testit.kotlin.client.api.TestRunsApi
-import ru.testit.kotlin.client.infrastructure.ApiException
+import ru.testit.kotlin.client.apis.AttachmentsApi
+import ru.testit.kotlin.client.apis.AutoTestsApi
+import ru.testit.kotlin.client.apis.TestResultsApi
+import ru.testit.kotlin.client.apis.TestRunsApi
 import ru.testit.kotlin.client.infrastructure.ApiClient
 import kotlinx.serialization.Serializable
 import ru.testit.kotlin.client.models.*
@@ -14,7 +13,7 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 
-@Serializable
+
 class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.testit.clients.ApiClient {
 
     private companion object {
@@ -37,28 +36,28 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     private val testResultsApi: TestResultsApi
 
     init {
-        val apiClient = ApiClient(clientConfiguration.url)
-        apiClient.apiKeyPrefix["Authorization"] = AUTH_PREFIX
-        apiClient.apiKey["Authorization"] = clientConfiguration.privateToken
-        apiClient.verifyingSsl = clientConfiguration.certValidation
+//        val apiClient = ApiClient(clientConfiguration.url)
 
-//            .apply {
-//            setBasePath(clientConfiguration.url)
-//            setApiKeyPrefix(AUTH_PREFIX)
-//            setApiKey(clientConfiguration.privateToken)
-//            setVerifyingSsl(clientConfiguration.certValidation)
-//        }
+        testRunsApi = TestRunsApi(clientConfiguration.url)
+        init(testRunsApi)
+        autoTestsApi = AutoTestsApi(clientConfiguration.url)
+        init(autoTestsApi)
+        attachmentsApi = AttachmentsApi(clientConfiguration.url)
+        init(attachmentsApi)
+        testResultsApi = TestResultsApi(clientConfiguration.url)
+        init(testResultsApi)
+    }
 
-        testRunsApi = TestRunsApi()
-        autoTestsApi = AutoTestsApi()
-        attachmentsApi = AttachmentsApi()
-        testResultsApi = TestResultsApi()
+    fun init(client: ApiClient ) {
+        client.apiKeyPrefix["Authorization"] = AUTH_PREFIX
+        client.apiKey["Authorization"] = clientConfiguration.privateToken
+        client.verifyingSsl = clientConfiguration.certValidation
     }
 
     override fun createTestRun(): TestRunV2GetModel {
-        val model = TestRunV2PostShortModel().apply {
+        val model = TestRunV2PostShortModel(
             projectId = UUID.fromString(clientConfiguration.projectId)
-        }
+        )
 
         LOGGER.debug("Create new test run: {}", model);
 
@@ -73,7 +72,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     override fun getWorkItemsLinkedToTest(testId: String): List<WorkItemIdentifierModel> {
         try {
             return autoTestsApi.getWorkItemsLinkedToAutoTest(testId, false, false)
-        } catch (e: ApiException) {
+        } catch (e: Exception) {
             LOGGER.error("Failed to retrieve work items linked to test $testId", e)
             throw e
         }
@@ -85,7 +84,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     ): List<String> {
         try {
             return testRunsApi.setAutoTestResultsForTestRun(UUID.fromString(testRunUuid), models).map { it.toString() }
-        } catch (e: ApiException) {
+        } catch (e: Exception) {
             LOGGER.error("Failed to send test results for test run $testRunUuid", e)
             throw e
         }
@@ -96,13 +95,12 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         try {
             var model = attachmentsApi.apiV2AttachmentsPost(file);
             return model.id.toString();
-        } catch (e: ApiException) {
+        } catch (e: Exception) {
             LOGGER.error("Failed to upload attachment from path $path", e)
             throw e
         }
     }
 
-    // TODO: threads?
     @Synchronized
     override fun linkAutoTestToWorkItems(id: String, workItemIds: Iterable<String>) {
         for (workItemId in workItemIds) {
@@ -113,7 +111,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
                     autoTestsApi.linkAutoTestToWorkItem(id, WorkItemIdModel(workItemId))
                     LOGGER.debug("Link autotest {} to workitem {} is successfully", id, workItemId)
                     break
-                } catch (e: ApiException) {
+                } catch (e: Exception) {
                     LOGGER.error("Cannot link autotest {} to work item {}", id, workItemId)
 
                     try {
@@ -149,7 +147,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
                 autoTestsApi.deleteAutoTestLinkFromWorkItem(testId, workItemId)
                 LOGGER.debug("Unlinked autotest $testId from workitem $workItemId")
                 return true
-            } catch (e: ApiException) {
+            } catch (e: Exception) {
                 LOGGER.error("Failed to unlink autotest $testId from work item $workItemId", e)
                 if (i == MAX_TRIES) throw e
                 try {
@@ -162,14 +160,6 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         }
         return false
     }
-
-//    suspend fun updateTestResult(uuid: UUID, model: TestResultUpdateModel): Unit = runCatching {
-//        testResultsApi.updateTestResult(uuid, model)
-//    }.onFailure { e ->
-//        LOGGER.error("Failed to update test result with UUID $uuid", e)
-//    }
-
-//    TODO: TBD
 
     @Synchronized
     override fun getTestRun(uuid: String): TestRunV2GetModel {
@@ -188,19 +178,19 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
     @Synchronized
     override fun createAutoTest(model: AutoTestPostModel): String {
+        println(model)
         return requireNotNull(autoTestsApi.createAutoTest(model).id.toString())
     }
 
     @Synchronized
     override fun getAutoTestByExternalId(externalId: String): AutoTestModel? {
-        val filter = AutotestFilterModel()
-
         val projectIds = hashSetOf(UUID.fromString(clientConfiguration.projectId))
-        filter.projectIds = projectIds
-        filter.isDeleted = false
-
         val externalIds = hashSetOf(externalId)
-        filter.externalIds = externalIds
+        val filter = AutotestFilterModel(
+            projectIds = projectIds,
+            isDeleted = false,
+            externalIds = externalIds
+        )
 
         val includes = SearchAutoTestsQueryIncludesModel(INCLUDE_STEPS, INCLUDE_LINKS, INCLUDE_LABELS)
 

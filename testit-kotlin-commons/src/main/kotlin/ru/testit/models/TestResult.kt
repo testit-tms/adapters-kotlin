@@ -1,51 +1,40 @@
 package ru.testit.models
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import ru.testit.kotlin.client.models.TestResultModel
 import ru.testit.services.Utils
 
 @Serializable
-class TestResult : ResultWithSteps, ResultWithAttachments {
-    var uuid: String? = null
-    var externalId: String? = null
-    var workItemIds = mutableListOf<String>()
-    var className: String? = null
-    var spaceName: String? = null
-    var labels = mutableListOf<Label>()
-    var linkItems = mutableListOf<LinkItem>()
-    var resultLinks = mutableListOf<LinkItem>()
-    private val attachments = mutableListOf<String>()
-    var name: String? = null
-    var title: String? = null
-    var message: String? = null
-    var itemStatus: ItemStatus? = null
-    private var itemStage: ItemStage? = null
-    var description: String? = null
-    private var steps = mutableListOf<StepResult>()
-    var start: Long? = null
-    var stop: Long? = null
-//    private var throwable: Throwable? = null
-val parameters = mutableMapOf<String, String>()
+data class TestResult(
+    var uuid: String? = null,
+    var externalId: String = "",
+    var workItemIds: MutableList<String> = mutableListOf<String>(),
+    var className: String = "",
+    var spaceName: String = "",
+    var labels: MutableList<Label> = mutableListOf<Label>(),
+    var linkItems: MutableList<LinkItem> = mutableListOf<LinkItem>(),
+    var resultLinks: MutableList<LinkItem> = mutableListOf<LinkItem>(),
+    var attachments: MutableList<String> = mutableListOf<String>(),
+    var name: String = "",
+    var title: String = "",
+    var message: String = "",
+    var itemStatus: ItemStatus? = null,
+    private var itemStage: ItemStage? = null,
+    var description: String = "",
+    private var steps: MutableList<StepResult> = mutableListOf<StepResult>(),
+    var start: Long = 0L,
+    var stop: Long = 0L,
+    @Contextual var throwable: Throwable? = null,
+    val parameters: MutableMap<String, String> = mutableMapOf<String, String>(),
     var automaticCreationTestCases: Boolean = false
-
-    override fun getAttachments(): List<String> {
-        return attachments
-    }
+): ResultWithSteps {
 
     fun setItemStage(stage: ItemStage) {
         this.itemStage = stage
     }
 
-    fun setStop(stop: Long) {
-        this.stop = stop
-    }
-
-    fun setStart(start: Long) {
-        this.start = start
-    }
-
-
-    override fun getSteps(): List<StepResult> {
+    override fun getSteps(): MutableList<StepResult> {
         return steps
     }
 
@@ -72,7 +61,7 @@ val parameters = mutableMapOf<String, String>()
             .append("    itemStage: ").append(Utils.toIndentedString(this.itemStage)).append("\n")
             .append("    description:").append(Utils.toIndentedString(this.description)).append("\n")
             .append("    steps:").append(Utils.toIndentedString(this.steps)).append("\n")
-//            .append("    throwable: ").append(Utils.toIndentedString(this.throwable)).append("\n")
+            .append("    throwable: ").append(Utils.toIndentedString(this.throwable)).append("\n")
             .append("    start: ").append(Utils.toIndentedString(this.start)).append("\n")
             .append("    stop: ").append(Utils.toIndentedString(this.stop)).append("\n")
             .append("    parameters: ").append(Utils.toIndentedString(this.parameters)).append("\n")

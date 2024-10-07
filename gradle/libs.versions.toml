@@ -1,0 +1,23 @@
+[versions]
+kotlin = "1.8.21"
+kotest = "5.8.1"
+allure = "2.24.0"
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+allure = { id = "io.qameta.allure", version = "2.12.0" }
+
+[libraries]
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-framework-api = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
+kotest-framework-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
+
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version = "2.15.2" }
+
+jaxb-api = { module = "javax.xml.bind:jaxb-api", version = "2.3.1" }
+jaxb-core = { module = "com.sun.xml.bind:jaxb-core", version = "4.0.5" }
+jaxb-impl = { module = "com.sun.xml.bind:jaxb-impl", version = "4.0.5" }
+
+[bundles]
+jaxb = ["jaxb-api", "jaxb-core", "jaxb-impl"]

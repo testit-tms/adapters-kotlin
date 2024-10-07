@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
 import ru.testit.clients.TmsApiClient
-import ru.testit.kotlin.client.infrastructure.ApiException
+import ru.testit.kotlin.client.infrastructure.ClientError
+import ru.testit.kotlin.client.infrastructure.ClientException
+import ru.testit.kotlin.client.infrastructure.ServerException
 import ru.testit.kotlin.client.models.TestRunState
 import ru.testit.listener.AdapterListener
 import ru.testit.properties.AdapterConfig
@@ -53,6 +55,9 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         this.listenerManager = listenerManager;
     }
 
+    /**
+     * @see [TmsApiClient.createTestRun]
+     */
     suspend fun startTests() {
         if (!adapterConfig.shouldEnableTmsIntegration()) {
             return
@@ -70,13 +75,17 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
 
             try {
                 val response = this.client.createTestRun()
+                println("set testRunId to: " + response.id.toString())
                 this.clientConfiguration.testRunId = response.id.toString()
-            } catch (e: ApiException) {
+            } catch (e: Exception) {
                 LOGGER.error("Can not start the launch: ${e.message}")
             }
         }
     }
 
+    /**
+     * Is not used in current version.
+     */
     suspend fun stopTests() {
         if (!adapterConfig.shouldEnableTmsIntegration()) {
             return
@@ -85,15 +94,16 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         LOGGER.debug("Stop launch")
 
         try {
+            println("get run by testRunId: " + this.clientConfiguration.testRunId)
             val testRun = this.client.getTestRun(this.clientConfiguration.testRunId)
 
             if (testRun.stateName != TestRunState.Completed) {
                 this.client.completeTestRun(this.clientConfiguration.testRunId)
             }
-        } catch (e: ApiException) {
-            if (e.responseBody?.contains("the StateName is already Completed") == true) {
-                return
-            }
+        } catch (e: Exception) {
+//            if (e.responseBody?.contains("the StateName is already Completed") == true) {
+//                return
+//            }
             LOGGER.error("Can not finish the launch: ${e.message}")
         }
     }
@@ -179,7 +189,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         val testResult = found.get()
 
         testResult.setItemStage(ItemStage.RUNNING)
-        testResult.setStart(System.currentTimeMillis())
+        testResult.start = System.currentTimeMillis()
 
         threadContext.start(uuid)
 
@@ -243,7 +253,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         listenerManager.beforeTestStop(testResult)
 
         testResult.setItemStage(ItemStage.FINISHED)
-        testResult.setStop(System.currentTimeMillis())
+        testResult.stop = System.currentTimeMillis()
 
         threadContext.clear()
 
@@ -419,9 +429,19 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
 
         storage.put(uuid, result)
         var parentStep = storage.getStep(parentUuid)
-        synchronized(storage) {
-            parentStep.get().getSteps().add(result)
+        if (!parentStep.isEmpty) {
+            synchronized(storage) {
+                parentStep.get().getSteps().add(result)
+            }
         }
+        else {
+            // TODO: not working with fun spec context ?
+            var parentTest = storage.getTestResult(parentUuid)
+            synchronized(storage) {
+                parentTest.get().getSteps().add(result)
+            }
+        }
+
 
         if (LOGGER.isDebugEnabled) LOGGER.debug("Start step $result for parent $parentUuid")
     }
@@ -523,12 +543,14 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
     fun getTestFromTestRun(): List<String> {
         if (adapterConfig.shouldEnableTmsIntegration()) {
             try {
+
+                println("get run by testRunId: " + this.clientConfiguration.testRunId)
                 val testsForRun = client.getTestFromTestRun(clientConfiguration.testRunId, clientConfiguration.configurationId)
 
                 if (LOGGER.isDebugEnabled()) LOGGER.debug("List of tests from test run: $testsForRun")
 
                 return testsForRun
-            } catch (e: ApiException) {
+            } catch (e: Exception) {
                 LOGGER.error("Could not get tests from test run", e)
             }
         }

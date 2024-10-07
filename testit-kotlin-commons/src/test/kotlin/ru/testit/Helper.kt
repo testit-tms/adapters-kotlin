@@ -54,7 +54,7 @@ class Helper {
 
             val steps = mutableListOf(generateStepResult())
 
-            val labels_ = mutableListOf(Label().setName(LABEL_NAME))
+            val labels_ = mutableListOf(Label(LABEL_NAME))
 
             return TestResult().setSteps(steps)
                 .apply {
@@ -76,12 +76,12 @@ class Helper {
         }
 
         fun generateLinkItem(): LinkItem {
-            return LinkItem().apply {
-                title = LINK_TITLE
-                description = LINK_DESCRIPTION
-                type = LINK_TYPE
+            return LinkItem(
+                title = LINK_TITLE,
+                description = LINK_DESCRIPTION,
+                type = LINK_TYPE,
                 url = LINK_URL
-            }
+            )
         }
 
         fun generateTestResultModel(): TestResultModel {
@@ -127,19 +127,18 @@ class Helper {
                 externalId = EXTERNAL_ID,
                 projectId = UUID.fromString(projectId),
                 name = NAME,
-            ).apply {
-                title = TITLE
-                description = DESCRIPTION
-                classname = CLASS_NAME
-                namespace = SPACE_NAME
-                steps = generateSteps()
-                links = generatePutLinks()
-                labels = generatePostLabels()
-                setup = emptyList()
-                teardown = emptyList()
-                id = UUID.fromString(TEST_UUID)
+                title = TITLE,
+                description = DESCRIPTION,
+                classname = CLASS_NAME,
+                namespace = SPACE_NAME,
+                steps = generateSteps(),
+                links = generatePutLinks(),
+                labels = generatePostLabels(),
+                setup = emptyList(),
+                teardown = emptyList(),
+                id = UUID.fromString(TEST_UUID),
                 isFlaky = null
-            }
+            )
             return model
         }
 
@@ -147,17 +146,16 @@ class Helper {
             val model = AutoTestPostModel(
                 externalId = EXTERNAL_ID,
                 projectId = UUID.fromString(projectId),
-                name = NAME
-            ).apply {
-                title = TITLE
-                description = DESCRIPTION
-                classname = CLASS_NAME
-                namespace = SPACE_NAME
-                steps = generateSteps()
-                links = generatePostLinks()
-                labels = generatePostLabels()
+                name = NAME,
+                title = TITLE,
+                description = DESCRIPTION,
+                classname = CLASS_NAME,
+                namespace = SPACE_NAME,
+                steps = generateSteps(),
+                links = generatePostLinks(),
+                labels = generatePostLabels(),
                 shouldCreateWorkItem = false
-            }
+            )
 
             return model
         }

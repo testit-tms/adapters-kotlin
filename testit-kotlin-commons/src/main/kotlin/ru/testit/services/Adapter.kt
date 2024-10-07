@@ -42,30 +42,35 @@ object Adapter {
     @Deprecated("This method is no longer acceptable to compute time between versions. " +
             "Use Adapter.addLinks(String, String, String, LinkType) instead.")
     suspend fun link(title: String, description: String, type: LinkType, url: String) {
-        val link = LinkItem().setTitle(title).setDescription(description).setType(type).setUrl(url)
+        val link = LinkItem(
+            title = title,
+            description = description,
+            type = type,
+            url = url
+        )
         getAdapterManager().updateTestCase { testResult -> testResult.resultLinks.add(link) }
     }
 
     @Deprecated("This method is no longer acceptable to compute time between versions. " +
             "Use Adapter.addLinks(String, String, String, LinkType) instead.")
     suspend fun addLink(url: String, title: String, description: String, type: LinkType) {
-        val link = LinkItem().apply {
-            this.title = title
-            this.description = description
-            this.type = type
-            this.url = url
-        }
+        val link = LinkItem(
+            title =title,
+            description = description,
+            type = type,
+            url = url
+        )
 
         addLinks(listOf(link))
     }
 
     suspend fun addLinks(url: String, title: String, description: String, type: LinkType) {
-        val link = LinkItem().apply {
-            this.title = title
-            this.description = description
-            this.type = type
-            this.url = url
-        }
+        val link = LinkItem(
+            title =title,
+            description = description,
+            type = type,
+            url = url
+        )
 
         addLinks(listOf(link))
     }
