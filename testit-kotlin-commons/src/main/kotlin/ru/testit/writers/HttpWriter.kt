@@ -82,7 +82,7 @@ class HttpWriter(
 
             val results: MutableList<AutoTestResultsForTestRunModel> = mutableListOf()
             results.add(autoTestResultsForTestRunModel)
-            println("send result by testRunId: " + config.testRunId)
+            LOGGER.debug("send result by testRunId: " + config.testRunId)
             val ids = apiClient.sendTestResults(config.testRunId, results)
             testResults[testResult.uuid!!] = UUID.fromString(ids[0])
         } catch (e: Exception) {
@@ -144,10 +144,6 @@ class HttpWriter(
                     teardown = afterClass,
                     isFlaky = autoTestModel.isFlaky
                 )
-
-//                autoTestPutModel.setup = beforeClass
-//                autoTestPutModel.teardown = afterClass
-//                autoTestPutModel.isFlaky = autoTestModel.isFlaky
 
                 apiClient.updateAutoTest(autoTestPutModel)
             } catch (e: Exception) {

@@ -203,7 +203,6 @@ class TestItWriter (
         if (!isTestOrContainersEnabled(testCase)) {
             return
         }
-        println("test finalization")
         var isContainer = testCase.type.name == "Container"
         var isStepContainer = isContainer && isStepContainers
 
@@ -243,7 +242,6 @@ class TestItWriter (
 //        val uuid = getExecTestWithUuid()
         executableTestService.setTestStatus()
         val uuid = executableTestService.getUuid()
-        println(uuid)
 
         testService.onTestStart(testCase, uuid)
         adapterManager.updateClassContainer(

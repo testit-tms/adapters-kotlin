@@ -75,7 +75,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
 
             try {
                 val response = this.client.createTestRun()
-                println("set testRunId to: " + response.id.toString())
+                LOGGER.debug("set testRunId to: " + response.id.toString())
                 this.clientConfiguration.testRunId = response.id.toString()
             } catch (e: Exception) {
                 LOGGER.error("Can not start the launch: ${e.message}")
@@ -94,7 +94,6 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         LOGGER.debug("Stop launch")
 
         try {
-            println("get run by testRunId: " + this.clientConfiguration.testRunId)
             val testRun = this.client.getTestRun(this.clientConfiguration.testRunId)
 
             if (testRun.stateName != TestRunState.Completed) {
@@ -544,7 +543,6 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         if (adapterConfig.shouldEnableTmsIntegration()) {
             try {
 
-                println("get run by testRunId: " + this.clientConfiguration.testRunId)
                 val testsForRun = client.getTestFromTestRun(clientConfiguration.testRunId, clientConfiguration.configurationId)
 
                 if (LOGGER.isDebugEnabled()) LOGGER.debug("List of tests from test run: $testsForRun")

@@ -33,7 +33,6 @@ class StepService (
         }
 
         var testName = step.spec.rootTests()[0].name.testName
-        println(testName)
 
         val parentUuid = executableTestService.getUuid()
         val stepUuid = getStepUuid(step)

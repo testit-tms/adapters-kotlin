@@ -6,17 +6,17 @@ plugins {
 }
 
 group = "ru.testit"
-version = "1.0.0"
+version = "0.1.0"
 
-repositories {
-    mavenCentral()
-}
 val slf4jVersion = "1.7.2"
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 dependencies {
-
-    implementation(files("../vendor/testit-api-kotlin-client-1.0.0.jar"))
+    implementation("ru.testit:testit-api-client-kotlin:0.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -32,4 +32,18 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(11)
+}
+
+publishing.publications.named<MavenPublication>("maven") {
+    pom {
+        from(components["java"])
+    }
+}
+
+tasks.jar {
+    manifest {
+        attributes(mapOf(
+            "Automatic-Module-Name" to "ru.testit.testit-kotlin-commons"
+        ))
+    }
 }

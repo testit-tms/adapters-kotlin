@@ -88,7 +88,6 @@ class FixtureService (
      */
     suspend fun handleFixturesFails(testCase: TestCase, result: TestResult,
                                     beforeTestStart: Long, afterTestStart: Long): Boolean {
-        println("after test extension")
         if (testCase.isStep(isStepContainers)) {
             return false
         }
@@ -98,7 +97,6 @@ class FixtureService (
         var beforeTestCause: Throwable? = null
 
         if (AdapterUtils.isAfterTestRegistered(testCase)) {
-            println("extension result handling")
             if (testCase.afterTestThrowable() != null) {
                 isAfterTestFailed = true
                 afterTestCause = testCase.afterTestThrowable()

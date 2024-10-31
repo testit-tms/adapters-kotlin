@@ -7,10 +7,11 @@ plugins {
 }
 
 group = "ru.testit"
-version = "1.0.0"
+version = "0.1.0"
 
-repositories {
-    mavenCentral()
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 val slf4jVersion = "1.7.2"
@@ -51,4 +52,18 @@ tasks.test {
 
 kotlin {
     jvmToolchain(11)
+}
+
+
+tasks.jar {
+    manifest {
+        attributes(mapOf(
+            "Automatic-Module-Name" to "ru.testit.testit-adapter-kotest"
+        ))
+    }
+}
+publishing.publications.named<MavenPublication>("maven") {
+    pom {
+        from(components["java"])
+    }
 }

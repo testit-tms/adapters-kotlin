@@ -178,7 +178,6 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
     @Synchronized
     override fun createAutoTest(model: AutoTestPostModel): String {
-        println(model)
         return requireNotNull(autoTestsApi.createAutoTest(model).id.toString())
     }
 
