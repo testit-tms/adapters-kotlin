@@ -13,7 +13,7 @@ Add this dependency to your project POM:
 <dependency>
     <groupId>ru.testit</groupId>
     <artifactId>testit-adapter-kotest</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -23,7 +23,7 @@ Add this dependency to your project POM:
 Add this dependency to your project build file:
 
 ```groovy
-implementation "ru.testit:testit-adapter-kotest:0.1.0"
+implementation "ru.testit:testit-adapter-kotest:0.1.1"
 ```
 
 
