@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ru.testit"
-version = "0.1.0"
+version = "0.1.1"
 
 val slf4jVersion = "1.7.2"
 
