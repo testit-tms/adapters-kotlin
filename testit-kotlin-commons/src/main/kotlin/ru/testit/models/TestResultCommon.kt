@@ -2,11 +2,10 @@ package ru.testit.models
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import ru.testit.kotlin.client.models.TestResultModel
 import ru.testit.services.Utils
 
 @Serializable
-data class TestResult(
+data class TestResultCommon(
     var uuid: String? = null,
     var externalId: String = "",
     var workItemIds: MutableList<String> = mutableListOf<String>(),
@@ -38,7 +37,7 @@ data class TestResult(
         return steps
     }
 
-    fun setSteps(steps: MutableList<StepResult>): TestResult {
+    fun setSteps(steps: MutableList<StepResult>): TestResultCommon {
         this.steps = steps
         return this
     }

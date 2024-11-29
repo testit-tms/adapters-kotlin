@@ -1,8 +1,6 @@
 package ru.testit.services
 
-import kotlinx.serialization.Serializable
 import ru.testit.models.*
-import java.util.LinkedList
 import java.util.Objects
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
@@ -18,8 +16,8 @@ class ResultStorage {
     private val storage = ConcurrentHashMap<String, Any>()
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
-    fun getTestResult(uuid: String): Optional<TestResult> {
-        return get(uuid, TestResult::class.java)
+    fun getTestResult(uuid: String): Optional<TestResultCommon> {
+        return get(uuid, TestResultCommon::class.java)
     }
 
     fun getFixture(uuid: String): Optional<FixtureResult> {

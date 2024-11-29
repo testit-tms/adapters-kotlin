@@ -3,6 +3,7 @@ package ru.testit.services
 import io.kotest.common.TestPath
 import io.kotest.core.test.TestCase
 import io.kotest.core.test.TestResult
+import org.jetbrains.annotations.VisibleForTesting
 import org.slf4j.LoggerFactory
 import ru.testit.listener.Consumers
 import ru.testit.models.ItemStatus
@@ -13,8 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 class StepService (
     private val adapterManager: AdapterManager,
     private val uuids: ConcurrentHashMap<TestPath, String>,
-    private val executableTestService: ExecutableTestService,
-    private val isStepContainers: Boolean
+    private val executableTestService: ExecutableTestService
 ) {
     private val LOGGER = LoggerFactory.getLogger(javaClass)
 
@@ -61,7 +61,7 @@ class StepService (
         }
         if (result is TestResult.Ignored) {
             debug("Step ignored: {}", step.name)
-            return updateStepAndStop(stepUuid, ItemStatus.SKIPPED, result.errorOrNull!!)
+            return updateStepAndStop(stepUuid, ItemStatus.SKIPPED, result.errorOrNull)
         }
         if (result is TestResult.Failure || result is TestResult.Error) {
             debug("Step failed: {}", step.name)
@@ -80,7 +80,8 @@ class StepService (
         executableTestService.setAsFailedBy(cause)
     }
 
-    private fun getStepUuid(step: TestCase): String {
+    @VisibleForTesting
+    internal fun getStepUuid(step: TestCase): String {
         val stepPath: String = step.parent!!.name.testName +
                 step.name.testName
         return Utils.getHash(stepPath)

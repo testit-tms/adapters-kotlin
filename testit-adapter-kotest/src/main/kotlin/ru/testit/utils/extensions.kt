@@ -8,7 +8,6 @@ import ru.testit.listener.TestItWriter
 import ru.testit.models.TestItContext
 import ru.testit.models.TestItParams
 
-
 fun TestCase.setAfterTestException(cause: Throwable?) {
     setParameters(
         TestItParams(
@@ -38,6 +37,7 @@ fun TestCase.setTeardownName(name: String) {
         )
     )
 }
+
 
 fun TestCase.setupName(): String? {
     return getParams()?.setupName
@@ -118,17 +118,19 @@ fun TestCase.asStepContainer() {
 }
 
 /**
- * check [TestItReporter.isStepContainers] and [TestItParams.isStepContainer] to be `true`
+ * @return `true` if `this.parent` set as Step Container using [TestCase.asStepContainer]
  */
-fun TestCase.isStepContainer(isStepContainers: Boolean): Boolean {
-    return isStepContainers && this.isStepContainer()
+fun TestCase.isStep(): Boolean {
+    val writer = getWriter() ?: return false
+    val p = writer.params[this.parent?.name.toString()] ?: return false
+    return p.isStepContainer
 }
 
 /**
- * check [TestItReporter.isStepContainers] and parent's [TestItParams.isStepContainer] to be `true`
+ * check [TestItParams.isStepContainer] to be `true`
  */
-fun TestCase.isStep(isStepContainers: Boolean): Boolean {
-    return isStepContainers && this.isStep()
+fun TestCase.isStepContainer(): Boolean {
+    return getParams()?.isStepContainer ?: false
 }
 
 
@@ -147,19 +149,6 @@ private fun TestCase.setParameters(value: TestItParams) {
         value.teardownName = if (value.teardownName != null) value.teardownName else params.teardownName
     }
     writer.params[this.name.toString()] = value
-}
-
-private fun TestCase.isStepContainer(): Boolean {
-    return getParams()?.isStepContainer ?: false
-}
-
-/**
- * @return `true` if `this.parent` set as Step Container using [TestCase.asStepContainer]
- */
-private fun TestCase.isStep(): Boolean {
-    val writer = getWriter() ?: return false
-    val p = writer.params[this.parent?.name.toString()] ?: return false
-    return p.isStepContainer
 }
 
 private fun TestCase.getWriter(): TestItWriter? {

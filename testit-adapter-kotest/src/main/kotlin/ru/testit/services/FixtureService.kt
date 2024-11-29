@@ -3,6 +3,7 @@ package ru.testit.services
 import io.kotest.core.test.TestCase
 import io.kotest.core.test.TestResult
 import io.kotest.engine.extensions.ExtensionException
+import org.jetbrains.annotations.VisibleForTesting
 import org.slf4j.LoggerFactory
 import ru.testit.models.ClassContainer
 import ru.testit.models.FixtureResult
@@ -10,12 +11,12 @@ import ru.testit.models.ItemStage
 import ru.testit.models.ItemStatus
 import ru.testit.utils.*
 import java.util.*
+import kotlin.reflect.KVisibility
 
 class FixtureService (
     private val adapterManager: AdapterManager,
     private val executableTestService: ExecutableTestService,
-    private val testService: TestService,
-    private val isStepContainers: Boolean
+    private val testService: TestService
 ) {
     var beforeFixtureUUID: String? = null
     var afterFixtureUUID: String? = null
@@ -88,7 +89,7 @@ class FixtureService (
      */
     suspend fun handleFixturesFails(testCase: TestCase, result: TestResult,
                                     beforeTestStart: Long, afterTestStart: Long): Boolean {
-        if (testCase.isStep(isStepContainers)) {
+        if (testCase.isStep()) {
             return false
         }
         var isAfterTestFailed = false
@@ -125,8 +126,8 @@ class FixtureService (
         return false
     }
 
-
-    private fun onAfterTestFailed(testCase: TestCase, start: Long, stop: Long) {
+    @VisibleForTesting
+    internal fun onAfterTestFailed(testCase: TestCase, start: Long, stop: Long) {
         var exception = testCase.afterTestThrowable()
         var tearDownName = testCase.teardownName() ?: "TearDown"
         debug("After test finished with error: {}", exception.toString())

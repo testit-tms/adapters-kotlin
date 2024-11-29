@@ -7,17 +7,19 @@ import io.kotest.core.test.TestResult
 import io.kotest.engine.test.names.DefaultDisplayNameFormatter
 import io.kotest.engine.test.names.FallbackDisplayNameFormatter
 import io.kotest.engine.test.names.formatTestPath
+import org.jetbrains.annotations.VisibleForTesting
 import org.slf4j.LoggerFactory
 import ru.testit.listener.Consumers
 import ru.testit.models.ItemStatus
 import ru.testit.utils.AdapterUtils
 import ru.testit.utils.getContext
+import ru.testit.utils.isStepContainer
 import java.util.concurrent.ConcurrentHashMap
 
 class TestService (
     private val adapterManager: AdapterManager,
-    private val uuids: ConcurrentHashMap<TestPath, String>,
-    private val isStepContainers: Boolean,
+    @VisibleForTesting
+    internal val uuids: ConcurrentHashMap<TestPath, String>,
     private val executableTestService: ExecutableTestService
 ) {
     private val LOGGER = LoggerFactory.getLogger(javaClass)
@@ -28,15 +30,17 @@ class TestService (
 
     private val debug = AdapterUtils.debug(LOGGER)
 
-
-    suspend fun onTestStart(testCase: TestCase, uuid: String) {
-        val fullName: String = formatter.formatTestPath(testCase, " / ")
-
-        val result = ru.testit.models.TestResult(
+    fun onTestStart(testCase: TestCase, uuid: String) {
+        var fullName: String
+        if (testCase.parent?.name?.testName == "") fullName = formatter.format(testCase)
+        else fullName = formatter.formatTestPath(testCase, " / ")
+        var spaceName : String = testCase.spec.javaClass.packageName
+        var className: String = testCase.spec.javaClass.simpleName
+        val result = ru.testit.models.TestResultCommon(
             uuid = uuid,
-            className = testCase.spec::class.simpleName!!,
+            className = className,
             name = testCase.name.testName,
-            spaceName = testCase.spec::class.java.`package`.name,
+            spaceName = spaceName,
             externalId = Utils.genExternalID(fullName),
             labels = Utils.defaultLabels(),
             linkItems = Utils.defaultLinks()
@@ -52,12 +56,13 @@ class TestService (
      * @see onTestIgnored
      * @see onTestSuccessful
      */
-    suspend fun stopTestWithResult(testCase: TestCase, result: TestResult) {
+    fun stopTestWithResult(testCase: TestCase, result: TestResult) {
         var isContainer = testCase.type.name == "Container"
-        var isStepContainer = isContainer && isStepContainers
+        var isStepContainer = isContainer && testCase.isStepContainer()
         var executableTest = executableTestService.getTest()
-
-        val uuid = uuids[testCase.descriptor.path()] ?: "Unknown test ${testCase.descriptor}"
+        var path = testCase.descriptor.path()
+        if (path.value == "") path = TestPath(testCase.descriptor.id.value)
+        val uuid = uuids[path] ?: "Unknown test ${testCase.descriptor}"
         val context = testCase.getContext()
         if (context != null) {
             adapterManager.updateTestCase(uuid, Consumers.setContext(context))
@@ -70,27 +75,25 @@ class TestService (
         if (result is TestResult.Success)
             return onTestSuccessful(testCase)
         if (result is TestResult.Ignored)
-            return onTestIgnored(testCase, result.errorOrNull!!)
+            return onTestIgnored(testCase, result.errorOrNull)
         if (result is TestResult.Failure || result is TestResult.Error)
             return onTestFailed(testCase, result.errorOrNull!!)
     }
 
 
-
-
-    private suspend fun onTestSuccessful(testCase: TestCase) {
+    private fun onTestSuccessful(testCase: TestCase) {
         debug("Test successful: {}", testCase.name)
         executableTestService.setAfterStatus()
         stopTestCase(executableTestService.getUuid(), null, ItemStatus.PASSED)
     }
 
-    private suspend fun onTestIgnored(testCase: TestCase, cause: Throwable) {
+    private fun onTestIgnored(testCase: TestCase, cause: Throwable?) {
         debug("Test ignored: {}", testCase.name)
         executableTestService.onTestIgnoredRefreshIfNeed()
         stopTestCase(executableTestService.getUuid(), cause, ItemStatus.SKIPPED);
     }
 
-    private suspend fun onTestFailed(testCase: TestCase, cause: Throwable) {
+    private fun onTestFailed(testCase: TestCase, cause: Throwable) {
         debug("Test failed: {}", testCase.name)
         if (!executableTestService.isTestStatus()) {
             return;
@@ -99,7 +102,7 @@ class TestService (
         stopTestCase(executableTestService.getUuid(), cause, ItemStatus.FAILED);
     }
 
-    suspend fun stopTestCase(uuid: String, throwable: Throwable?, status: ItemStatus) {
+    fun stopTestCase(uuid: String, throwable: Throwable?, status: ItemStatus) {
         adapterManager.updateTestCase(uuid, Consumers.setStatus(status, throwable))
         adapterManager.stopTestCase(uuid)
     }

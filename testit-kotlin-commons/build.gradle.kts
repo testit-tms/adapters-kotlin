@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ru.testit"
-version = "0.1.1"
+version = "0.2.0"
 
 val slf4jVersion = "1.7.2"
 
@@ -16,7 +16,7 @@ java {
 }
 
 dependencies {
-    implementation("ru.testit:testit-api-client-kotlin:0.1.0")
+    implementation("ru.testit:testit-api-client-kotlin:0.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")

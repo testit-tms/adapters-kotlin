@@ -57,9 +57,9 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun getTestResult(uuid: UUID): TestResultModel
+    fun getTestResult(uuid: UUID): TestResultResponse
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun updateTestResult(uuid: UUID, model: TestResultUpdateModel)
+    fun updateTestResult(uuid: UUID, model: TestResultUpdateV2Request )
 }
