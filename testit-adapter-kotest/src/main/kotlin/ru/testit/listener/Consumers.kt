@@ -3,7 +3,7 @@ package ru.testit.listener
 import ru.testit.models.ItemStatus
 import ru.testit.models.StepResult
 import ru.testit.models.TestItContext
-import ru.testit.models.TestResult
+import ru.testit.models.TestResultCommon
 import java.util.Objects.nonNull
 import java.util.function.Consumer
 
@@ -12,8 +12,8 @@ object Consumers {
     /**
      * Sets the item status and optional throwable for a test result.
      */
-    fun setStatus(status: ItemStatus, throwable: Throwable?): Consumer<TestResult> {
-        return Consumer<TestResult> { result: TestResult ->
+    fun setStatus(status: ItemStatus, throwable: Throwable?): Consumer<TestResultCommon> {
+        return Consumer<TestResultCommon> { result: TestResultCommon ->
             result.itemStatus = status
             if (nonNull(throwable)) {
                 result.throwable = throwable
@@ -36,8 +36,8 @@ object Consumers {
     /**
      * Sets the context properties for a test result.
      */
-    fun setContext(context: TestItContext): Consumer<TestResult> {
-        return Consumer<TestResult> { result: TestResult ->
+    fun setContext(context: TestItContext): Consumer<TestResultCommon> {
+        return Consumer<TestResultCommon> { result: TestResultCommon ->
             result.externalId = context.externalId ?: result.externalId
             result.description = context.description ?: result.description
             result.workItemIds = context.workItemIds ?: result.workItemIds

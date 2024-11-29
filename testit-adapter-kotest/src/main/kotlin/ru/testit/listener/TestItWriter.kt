@@ -14,14 +14,12 @@ import java.lang.reflect.InvocationTargetException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
-import ru.testit.models.TestResult as TestItTestResult
+import ru.testit.models.TestResultCommon as TestItTestResult
 
 
 
 
-class TestItWriter (
-    private var isStepContainers: Boolean = false
-) {
+class TestItWriter () {
     private val LOGGER = LoggerFactory.getLogger(javaClass)
     private val debug = AdapterUtils.debug(LOGGER)
 
@@ -41,7 +39,8 @@ class TestItWriter (
      * Checks `testCase` to be valid test or [TestItReporter.isStepContainers] to be true
      */
     private val isTestOrContainersEnabled: (testCase: TestCase) -> Boolean = {
-            testCase: TestCase -> testCase.type == TestType.Test || isStepContainers }
+            testCase: TestCase -> testCase.type == TestType.Container
+                || testCase.type == TestType.Test || testCase.type == TestType.Dynamic }
 
     private val executableTestService = ExecutableTestService(
         executableTest = ThreadLocal.withInitial { ExecutableTest() }
@@ -49,29 +48,26 @@ class TestItWriter (
     private val stepService = StepService(
         adapterManager = adapterManager,
         uuids = uuids,
-        executableTestService = executableTestService,
-        isStepContainers = isStepContainers
+        executableTestService = executableTestService
     )
 
     private val testService = TestService(
         adapterManager = adapterManager,
         uuids = uuids,
-        executableTestService = executableTestService,
-        isStepContainers = isStepContainers
+        executableTestService = executableTestService
     )
 
     private val fixtureService = FixtureService(
         adapterManager = adapterManager,
         executableTestService = executableTestService,
-        testService = testService,
-        isStepContainers = isStepContainers
+        testService = testService
     )
 
 
     /**
      * Used for `instantiationError` error handling
      */
-    suspend fun onInstantiationError(kclass: KClass<*>, t: Throwable) {
+    fun onInstantiationError(kclass: KClass<*>, t: Throwable) {
         var uuid = UUID.randomUUID()
 
         var result = TestItTestResult(
@@ -90,7 +86,7 @@ class TestItWriter (
     /**
      * @see runContainers
      */
-    suspend fun onBeforeAll(spec: Spec) {
+    fun onBeforeAll(spec: Spec) {
         var rootTestName =  spec.rootTests()[0].name.testName
         debug("Before all: {}",rootTestName)
         runContainers(rootTestName)
@@ -99,7 +95,7 @@ class TestItWriter (
     /**
      * @see stopContainers
      */
-    suspend fun onAfterAll(spec: Spec) {
+    fun onAfterAll(spec: Spec) {
         var rootTestName =  spec.rootTests()[0].name.testName
         debug("After all: {}", rootTestName)
         stopContainers(rootTestName)
@@ -117,7 +113,7 @@ class TestItWriter (
      * @see FixtureService.registerAfterTestFixture
      */
     fun registerBeforeAfterExtensions(testCase: TestCase) {
-        if (testCase.isStep(isStepContainers)) {
+        if (testCase.isStep()) {
             return
         }
         executableTestService.refreshUuid()
@@ -139,7 +135,7 @@ class TestItWriter (
      * @see FixtureService.onBeforeTestOk
      */
     fun finishBeforeTestIfExists(testCase: TestCase) {
-        if (testCase.isStep(isStepContainers)) {
+        if (testCase.isStep()) {
             return
         }
         // write beforeTest successful results
@@ -156,7 +152,7 @@ class TestItWriter (
      * @see FixtureService.updateAfterTestTime
      */
     fun onAfterTestInvocation(testCase: TestCase) {
-        if (testCase.isStep(isStepContainers)) {
+        if (testCase.isStep()) {
             return
         }
         if (AdapterUtils.isAfterTestRegistered(testCase)) {
@@ -171,18 +167,13 @@ class TestItWriter (
      * @see StepService.onStepStart
      * @see onTestStart
      */
-    suspend fun onBeforeTestInvocation(testCase: TestCase) {
+    fun onBeforeTestInvocation(testCase: TestCase) {
         if (!isTestOrContainersEnabled(testCase)) {
             return
         }
         var isContainer = testCase.type.name == "Container"
-        var isStep = testCase.isStep(isStepContainers);
-        
+        var isStep = testCase.isStep();
         if (isContainer) {
-            if (!isStepContainers) {
-                debug("we are inside default container", "")
-                return
-            }
             debug("we are in step container", "")
         }
         if (isStep) {
@@ -204,16 +195,12 @@ class TestItWriter (
             return
         }
         var isContainer = testCase.type.name == "Container"
-        var isStepContainer = isContainer && isStepContainers
 
-        if (isContainer && !isStepContainers) {
-            return
-        }
-        if (testCase.isStep(isStepContainers)) {
+        if (testCase.isStep()) {
             return stepService.stopStepWithResult(testCase, result)
         }
         // no mark in describe
-        if (isContainer && !testCase.isStepContainer(isStepContainers)) {
+        if (isContainer && !testCase.isStepContainer()) {
             return
         }
         testService.stopTestWithResult(testCase, result)
@@ -236,7 +223,7 @@ class TestItWriter (
      * @see TestService.onTestStart
      * @see AdapterManager.updateClassContainer
      */
-    private suspend fun onTestStart(testCase: TestCase) {
+    private fun onTestStart(testCase: TestCase) {
         debug("Intercept test: {}", testCase.name)
         val testName = testCase.spec.rootTests()[0].name.testName
 //        val uuid = getExecTestWithUuid()
@@ -254,7 +241,7 @@ class TestItWriter (
      * Create new test run.
      * Init main and class containers using [AdapterManager] api
      */
-    private suspend fun runContainers(rootTestName: String) {
+    private fun runContainers(rootTestName: String) {
         adapterManager.startTests()
         lastMainContainerId = UUID.randomUUID().toString()
         val mainContainer = MainContainer(
@@ -268,7 +255,7 @@ class TestItWriter (
         adapterManager.startClassContainer(lastMainContainerId!!, classContainer)
     }
 
-    private suspend fun stopContainers(rootTestName: String) {
+    private fun stopContainers(rootTestName: String) {
         adapterManager.stopClassContainer(Utils.getHash(rootTestName))
         adapterManager.stopMainContainer(lastMainContainerId!!)
     }

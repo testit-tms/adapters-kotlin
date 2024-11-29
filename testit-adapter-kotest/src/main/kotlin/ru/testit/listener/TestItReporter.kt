@@ -8,12 +8,11 @@ import io.kotest.core.test.TestResult
 import kotlin.reflect.KClass
 
 class TestItReporter(
-    private val isStepContainers: Boolean = false,
 ) : BeforeTestListener, AfterTestListener, InstantiationErrorListener, ProjectListener,
     BeforeSpecListener, AfterSpecListener, BeforeInvocationListener, AfterInvocationListener,
     AfterEachListener, FinalizeSpecListener, AfterContainerListener {
 
-    val writer = TestItWriter(isStepContainers)
+    val writer = TestItWriter()
 
     // beforeAll analogue
     override suspend fun beforeSpec(spec: Spec) {

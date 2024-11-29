@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "ru.testit"
-version = "0.1.1"
+version = "0.2.0"
 
 java {
     withJavadocJar()
@@ -32,6 +32,7 @@ dependencies {
     implementation("ch.qos.logback:logback-core:1.5.8")
     implementation("io.kotest:kotest-framework-datatest:5.9.1")
 
+    testImplementation("io.mockk:mockk:1.13.12")
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.jackson.module.kotlin)

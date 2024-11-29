@@ -1,7 +1,5 @@
 package ru.testit.writers
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.util.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +12,7 @@ import ru.testit.kotlin.client.models.AutoTestResultsForTestRunModel
 import ru.testit.models.ClassContainer
 import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
-import ru.testit.models.TestResult
+import ru.testit.models.TestResultCommon
 import ru.testit.services.ResultStorage
 import java.util.Collections.addAll
 
@@ -29,33 +27,33 @@ class HttpWriter(
 
     private val testResults: MutableMap<String, UUID> = HashMap()
 
-    override fun writeTest(testResult: TestResult) {
+    override fun writeTest(testResultCommon: TestResultCommon) {
         try {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Write auto test {}", testResult.externalId)
+                LOGGER.debug("Write auto test {}", testResultCommon.externalId)
             }
 
-            val autotest = apiClient.getAutoTestByExternalId(testResult.externalId!!)
-            val workItemIds = testResult.workItemIds
+            val autotest = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
+            val workItemIds = testResultCommon.workItemIds
             var autoTestId: String? = null
 
             if (autotest != null) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Auto test is exist. Update auto test {}", testResult.externalId)
+                    LOGGER.debug("Auto test is exist. Update auto test {}", testResultCommon.externalId)
                 }
 
                 val autoTestPutModel: AutoTestPutModel
                 when {
-                    testResult.itemStatus == ItemStatus.FAILED -> {
+                    testResultCommon.itemStatus == ItemStatus.FAILED -> {
                         autoTestPutModel = Converter.autoTestModelToAutoTestPutModel(
                             autoTestModel = autotest,
-                            links = Converter.convertPutLinks(testResult.linkItems),
+                            links = Converter.convertPutLinks(testResultCommon.linkItems),
                             isFlaky = autotest.isFlaky)
                     }
 
                     else -> {
                         autoTestPutModel = Converter.testResultToAutoTestPutModel(
-                            result = testResult,
+                            result = testResultCommon,
                             projectId = UUID.fromString(config.projectId),
                             isFlaky = autotest.isFlaky)
                     }
@@ -66,10 +64,10 @@ class HttpWriter(
                 autoTestId = autotest.id.toString()
             } else {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Create new auto test {}", testResult.externalId)
+                    LOGGER.debug("Create new auto test {}", testResultCommon.externalId)
                 }
 
-                val model = Converter.testResultToAutoTestPostModel(testResult, UUID.fromString(config.projectId))
+                val model = Converter.testResultToAutoTestPostModel(testResultCommon, UUID.fromString(config.projectId))
                 autoTestId = apiClient.createAutoTest(model)
             }
 
@@ -78,13 +76,13 @@ class HttpWriter(
             }
 
             val autoTestResultsForTestRunModel = Converter.testResultToAutoTestResultsForTestRunModel(
-                testResult, UUID.fromString(config.configurationId))
+                testResultCommon, UUID.fromString(config.configurationId))
 
             val results: MutableList<AutoTestResultsForTestRunModel> = mutableListOf()
             results.add(autoTestResultsForTestRunModel)
             LOGGER.debug("send result by testRunId: " + config.testRunId)
             val ids = apiClient.sendTestResults(config.testRunId, results)
-            testResults[testResult.uuid!!] = UUID.fromString(ids[0])
+            testResults[testResultCommon.uuid!!] = UUID.fromString(ids[0])
         } catch (e: Exception) {
             LOGGER.error("Can not write the autotest: {}", e.message)
         }

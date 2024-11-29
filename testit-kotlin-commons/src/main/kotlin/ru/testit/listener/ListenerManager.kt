@@ -2,7 +2,7 @@ package ru.testit.listener
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import ru.testit.models.TestResult
+import ru.testit.models.TestResultCommon
 import java.util.function.BiConsumer
 
 
@@ -13,9 +13,9 @@ class ListenerManager(val listeners: List<AdapterListener>) {
         private val LOGGER: Logger = LoggerFactory.getLogger(ListenerManager::class.java)
     }
 
-    fun beforeTestStop(result: TestResult) {
+    fun beforeTestStop(result: TestResultCommon) {
         runSafelyMethod(listeners,
-            BiConsumer<AdapterListener, TestResult> { obj: AdapterListener, result: TestResult? -> obj.beforeTestStop(result) },
+            BiConsumer<AdapterListener, TestResultCommon> { obj: AdapterListener, result: TestResultCommon? -> obj.beforeTestStop(result) },
             result)
     }
 

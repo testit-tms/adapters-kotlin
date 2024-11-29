@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
 import ru.testit.clients.TmsApiClient
-import ru.testit.kotlin.client.infrastructure.ClientError
-import ru.testit.kotlin.client.infrastructure.ClientException
-import ru.testit.kotlin.client.infrastructure.ServerException
 import ru.testit.kotlin.client.models.TestRunState
 import ru.testit.listener.AdapterListener
 import ru.testit.properties.AdapterConfig
@@ -58,7 +55,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
     /**
      * @see [TmsApiClient.createTestRun]
      */
-    suspend fun startTests() {
+    fun startTests() {
         if (!adapterConfig.shouldEnableTmsIntegration()) {
             return
         }
@@ -86,7 +83,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
     /**
      * Is not used in current version.
      */
-    suspend fun stopTests() {
+    fun stopTests() {
         if (!adapterConfig.shouldEnableTmsIntegration()) {
             return
         }
@@ -107,7 +104,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         }
     }
 
-    suspend fun startMainContainer(container: MainContainer) {
+    fun startMainContainer(container: MainContainer) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         container.start = System.currentTimeMillis()
@@ -116,7 +113,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         if (LOGGER.isDebugEnabled) LOGGER.debug("Start new main container {}", container)
     }
 
-    suspend fun stopMainContainer(uuid: String) {
+    fun stopMainContainer(uuid: String) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         val found = storage.getTestsContainer(uuid)
@@ -132,7 +129,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         writer?.writeTests(container)
     }
 
-    suspend fun startClassContainer(parentUuid: String, container: ClassContainer) {
+    fun startClassContainer(parentUuid: String, container: ClassContainer) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         storage.getTestsContainer(parentUuid).ifPresent { parent ->
@@ -146,7 +143,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         if (LOGGER.isDebugEnabled) LOGGER.debug("Start new class container {} for parent {}", container, parentUuid)
     }
 
-    suspend fun stopClassContainer(uuid: String) {
+    fun stopClassContainer(uuid: String) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         val found = storage.getClassContainer(uuid)
@@ -162,7 +159,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         writer?.writeClass(container)
     }
 
-    suspend fun updateClassContainer(uuid: String, update: Consumer<ClassContainer>) {
+    fun updateClassContainer(uuid: String, update: Consumer<ClassContainer>) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Update class container {}", uuid)
@@ -176,7 +173,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         update.accept(container)
     }
 
-    suspend fun startTestCase(uuid: String) {
+    fun startTestCase(uuid: String) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         threadContext.clear()
@@ -197,7 +194,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         }
     }
 
-    suspend fun scheduleTestCase(result: TestResult) {
+    fun scheduleTestCase(result: TestResultCommon) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         result.setItemStage(ItemStage.SCHEDULED)
@@ -209,7 +206,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         }
     }
 
-    suspend fun updateTestCase(update: Consumer<TestResult>) {
+    fun updateTestCase(update: Consumer<TestResultCommon>) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         val root = threadContext.getRoot()
@@ -222,7 +219,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         updateTestCase(uuid, update)
     }
 
-    suspend fun updateTestCase(uuid: String, update: Consumer<TestResult>) {
+    fun updateTestCase(uuid: String, update: Consumer<TestResultCommon>) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         if (LOGGER.isDebugEnabled()) {
@@ -239,7 +236,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         update.accept(testResult)
     }
 
-    suspend fun stopTestCase(uuid: String) {
+    fun stopTestCase(uuid: String) {
         if (!adapterConfig.shouldEnableTmsIntegration()) return
 
         val found = storage.getTestResult(uuid)

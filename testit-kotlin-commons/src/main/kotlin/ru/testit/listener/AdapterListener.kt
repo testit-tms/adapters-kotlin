@@ -1,8 +1,8 @@
 package ru.testit.listener
 
-import ru.testit.models.TestResult
+import ru.testit.models.TestResultCommon
 
 interface AdapterListener : DefaultListener {
-    fun beforeTestStop(result: TestResult?) {
+    fun beforeTestStop(result: TestResultCommon?) {
     }
 }

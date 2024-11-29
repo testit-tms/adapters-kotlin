@@ -3,6 +3,8 @@ package ru.testit.writers
 import ru.testit.kotlin.client.models.*
 import ru.testit.kotlin.client.models.LinkType
 import ru.testit.models.*
+import ru.testit.models.Label
+import ru.testit.models.StepResult
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -13,7 +15,7 @@ class Converter {
 
     companion object {
 
-        fun testResultToAutoTestPostModel(result: TestResult, projectId: UUID?): AutoTestPostModel {
+        fun testResultToAutoTestPostModel(result: TestResultCommon, projectId: UUID?): AutoTestPostModel {
             val model = AutoTestPostModel(
                 externalId = result.externalId!!,
                 projectId = projectId ?: UUID.fromString(result.uuid),
@@ -29,13 +31,13 @@ class Converter {
             )
             return model
         }
-        fun testResultToAutoTestPutModel(result: TestResult): AutoTestPutModel {
+        fun testResultToAutoTestPutModel(result: TestResultCommon): AutoTestPutModel {
             return testResultToAutoTestPutModel(result, null, null)
         }
 
-        fun testResultToAutoTestPutModel(result: TestResult,
-                                             projectId: UUID?,
-                                             isFlaky: Boolean?): AutoTestPutModel {
+        fun testResultToAutoTestPutModel(result: TestResultCommon,
+                                         projectId: UUID?,
+                                         isFlaky: Boolean?): AutoTestPutModel {
             val model = AutoTestPutModel(
                 externalId = result.externalId!!,
                 projectId = projectId ?: UUID.fromString(result.uuid),
@@ -56,11 +58,11 @@ class Converter {
         }
 
 
-        fun testResultToTestResultUpdateModel(result: TestResultModel,
+        fun testResultToTestResultUpdateModel(result: TestResultResponse,
                                               setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
                                               teardownResults: List<AttachmentPutModelAutoTestStepResultsModel>?
-        ): TestResultUpdateModel {
-            val model = TestResultUpdateModel(
+        ): TestResultUpdateV2Request  {
+            val model = TestResultUpdateV2Request (
                 duration = result.durationInMs,
                 outcome = result.outcome,
                 links = result.links,
@@ -140,13 +142,13 @@ class Converter {
             return model
         }
 
-        fun testResultToAutoTestResultsForTestRunModel(result: TestResult, configurationId: UUID?,
+        fun testResultToAutoTestResultsForTestRunModel(result: TestResultCommon, configurationId: UUID?,
         ): AutoTestResultsForTestRunModel {
             return testResultToAutoTestResultsForTestRunModel(
                 result, configurationId, null, null)
         }
 
-        fun testResultToAutoTestResultsForTestRunModel(result: TestResult,
+        fun testResultToAutoTestResultsForTestRunModel(result: TestResultCommon,
                                                        configurationId: UUID?,
                                                        setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
                                                        teardownResults: List<AttachmentPutModelAutoTestStepResultsModel>?
@@ -255,11 +257,11 @@ class Converter {
             return date.toInstant().atOffset(ZoneOffset.UTC)
         }
 
-        fun convertAttachments(uuids: List<String>): List<AttachmentPutModel> =
+        fun convertAttachments(uuids: List<String>): List<AttachmentPutModel>? =
             uuids.map { AttachmentPutModel(id = UUID.fromString(it)) }
 
-        fun convertAttachmentsFromModel(models: List<AttachmentModel>): List<AttachmentPutModel> =
-            models.map { AttachmentPutModel(id = it.id) }
+        fun convertAttachmentsFromModel(models: List<Attachment>): List<AttachmentUpdateRequest> =
+            models.map { AttachmentUpdateRequest(id = it.id) }
 
 
     }

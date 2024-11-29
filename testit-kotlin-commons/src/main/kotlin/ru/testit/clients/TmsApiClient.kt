@@ -133,11 +133,11 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
                 .mapNotNull { it.autoTest?.externalId }.toList()
     }
 
-    override fun getTestResult(uuid: UUID): TestResultModel {
+    override fun getTestResult(uuid: UUID): TestResultResponse  {
         return testResultsApi.apiV2TestResultsIdGet(uuid)
     }
 
-    override fun updateTestResult(uuid: UUID, model: TestResultUpdateModel) {
+    override fun updateTestResult(uuid: UUID, model: TestResultUpdateV2Request ) {
         testResultsApi.apiV2TestResultsIdPut(uuid, model)
     }
 

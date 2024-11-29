@@ -2,7 +2,9 @@ package ru.testit
 
 import ru.testit.kotlin.client.models.*
 import ru.testit.models.*
+import ru.testit.models.Label
 import ru.testit.models.LinkType
+import ru.testit.models.StepResult
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -46,7 +48,7 @@ class Helper {
             return listOf(UUID.randomUUID())
         }
 
-        fun generateTestResult(): TestResult {
+        fun generateTestResult(): TestResultCommon {
             val startDate = Date()
             val stopDate = Date(startDate.time + 1000)
 
@@ -56,7 +58,7 @@ class Helper {
 
             val labels_ = mutableListOf(Label(LABEL_NAME))
 
-            return TestResult().setSteps(steps)
+            return TestResultCommon().setSteps(steps)
                 .apply {
                 externalId = EXTERNAL_ID
                 uuid = TEST_UUID
