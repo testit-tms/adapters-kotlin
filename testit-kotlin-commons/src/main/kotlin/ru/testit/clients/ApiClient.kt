@@ -9,11 +9,11 @@ import java.util.UUID
 interface ApiClient {
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun createTestRun(): TestRunV2GetModel
+    fun createTestRun(): TestRunV2ApiResult
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun getTestRun(uuid: String): TestRunV2GetModel
+    fun getTestRun(uuid: String): TestRunV2ApiResult
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
@@ -29,7 +29,7 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun getAutoTestByExternalId(externalId: String): AutoTestModel?
+    fun getAutoTestByExternalId(externalId: String): AutoTestApiResult?
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)

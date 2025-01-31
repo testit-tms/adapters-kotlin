@@ -37,7 +37,7 @@ class HttpWriterTest {
     @Test
     fun writeTest_WithExistingAutoTest_InvokeUpdateHandler() {
         val testResult = Helper.generateTestResult()
-        val response = Helper.generateAutoTestModel(config.projectId)
+        val response = Helper.generateAutoTestApiResult(config.projectId)
         val request = Helper.generateAutoTestPutModel(config.projectId)
         val uuids = Helper.generateListUuid()
         val strUuids = uuids.map { x -> x.toString() }

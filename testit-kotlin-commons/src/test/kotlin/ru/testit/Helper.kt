@@ -86,21 +86,21 @@ class Helper {
             )
         }
 
-        fun generateTestResultModel(): TestResultModel {
-            val model = TestResultModel(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                OffsetDateTime.now(),
-                UUID.randomUUID(),
-                listOf(),
-                durationInMs = 12345L
-            )
-//            model.durationInMs = 12345L
-            return model
-        }
+//        fun generateTestResultModel(): TestResultModel {
+//            val model = TestResultModel(
+//                UUID.randomUUID(),
+//                UUID.randomUUID(),
+//                UUID.randomUUID(),
+//                UUID.randomUUID(),
+//                UUID.randomUUID(),
+//                OffsetDateTime.now(),
+//                UUID.randomUUID(),
+//                listOf(),
+//                durationInMs = 12345L
+//            )
+////            model.durationInMs = 12345L
+//            return model
+//        }
 
         fun generateAutoTestModel(projectId: String): AutoTestModel {
             val model = AutoTestModel(
@@ -120,6 +120,29 @@ class Helper {
                 title = TITLE,
                 description = DESCRIPTION,
                 labels = generateShortLabels(),
+            )
+            return model
+        }
+
+        fun generateAutoTestApiResult(projectId: String): AutoTestApiResult {
+            val model = AutoTestApiResult(
+                globalId = 12345L,
+                isDeleted = false,
+                mustBeApproved = false,
+                id = UUID.fromString(TEST_UUID),
+                createdDate = OffsetDateTime.now(),
+                createdById = UUID.randomUUID(),
+                externalId = EXTERNAL_ID,
+                projectId = UUID.fromString(projectId),
+                name = NAME,
+                links = generateLinkApiResults(),
+                steps = generateAutoTestStepApiResults(),
+                setup = emptyList(),
+                teardown = emptyList(),
+                title = TITLE,
+                description = DESCRIPTION,
+                labels = generateLabelApiResults(),
+                isFlaky = false,
             )
             return model
         }
@@ -300,6 +323,17 @@ class Helper {
             return labels
         }
 
+        private fun generateLabelApiResults(): List<LabelApiResult> {
+            val labels = mutableListOf<LabelApiResult>()
+            val label = LabelApiResult(
+                globalId = 12345L,
+                name = LABEL_NAME
+            )
+            labels.add(label)
+
+            return labels
+        }
+
         private fun generatePostLabels(): List<LabelPostModel> {
             val labels = mutableListOf<LabelPostModel>()
 
@@ -315,6 +349,22 @@ class Helper {
             val links = mutableListOf<LinkPutModel>()
 
             val link = LinkPutModel(
+                title = LINK_TITLE,
+                hasInfo = true,
+                description = LINK_DESCRIPTION,
+                url = LINK_URL,
+                type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
+            )
+
+            links.add(link)
+
+            return links
+        }
+
+        private fun generateLinkApiResults(): List<LinkApiResult> {
+            val links = mutableListOf<LinkApiResult>()
+
+            val link = LinkApiResult(
                 title = LINK_TITLE,
                 hasInfo = true,
                 description = LINK_DESCRIPTION,
@@ -347,6 +397,19 @@ class Helper {
             val steps = mutableListOf<AutoTestStepModel>()
 
             val step = AutoTestStepModel(
+                title = STEP_TITLE,
+                description = STEP_DESCRIPTION,
+                steps = ArrayList()
+            )
+
+            steps.add(step)
+            return steps
+        }
+
+        private fun generateAutoTestStepApiResults(): List<AutoTestStepApiResult> {
+            val steps = mutableListOf<AutoTestStepApiResult>()
+
+            val step = AutoTestStepApiResult(
                 title = STEP_TITLE,
                 description = STEP_DESCRIPTION,
                 steps = ArrayList()
