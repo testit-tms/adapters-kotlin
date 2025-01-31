@@ -116,12 +116,13 @@ class Converter {
             return autoTestModelToAutoTestPutModel(autoTestModel, links, isFlaky, null, null)
         }
 
-        fun autoTestModelToAutoTestPutModel(autoTestModel: AutoTestModel,
-                                            links: List<LinkPutModel>?,
-                                            isFlaky: Boolean?,
-                                            setup:  List<AutoTestStepModel>?,
-                                            teardown:  List<AutoTestStepModel>?,
-                                            ): AutoTestPutModel {
+        fun autoTestModelToAutoTestPutModel(
+            autoTestModel: AutoTestModel,
+            links: List<LinkPutModel>?,
+            isFlaky: Boolean?,
+            setup: List<AutoTestStepModel>?,
+            teardown: List<AutoTestStepModel>?,
+        ): AutoTestPutModel {
             val model = AutoTestPutModel(
                 id = autoTestModel.id,
                 externalId = autoTestModel.externalId,
@@ -142,7 +143,8 @@ class Converter {
             return model
         }
 
-        fun testResultToAutoTestResultsForTestRunModel(result: TestResultCommon, configurationId: UUID?,
+        fun testResultToAutoTestResultsForTestRunModel(
+            result: TestResultCommon, configurationId: UUID?,
         ): AutoTestResultsForTestRunModel {
             return testResultToAutoTestResultsForTestRunModel(
                 result, configurationId, null, null)
@@ -263,6 +265,80 @@ class Converter {
         fun convertAttachmentsFromModel(models: List<Attachment>): List<AttachmentUpdateRequest> =
             models.map { AttachmentUpdateRequest(id = it.id) }
 
+        fun convertAutoTestApiResultToAutoTestModel(autoTestApiResult: AutoTestApiResult?): AutoTestModel? {
+            if (autoTestApiResult?.externalId == null) {
+                return null;
+            }
 
+            val model = AutoTestModel(
+                id = autoTestApiResult.id,
+                externalId = autoTestApiResult.externalId!!,
+                links = convertLinkApiResultsToPutLinks(autoTestApiResult.links),
+                projectId = autoTestApiResult.projectId,
+                name = autoTestApiResult.name,
+                namespace = autoTestApiResult.namespace,
+                classname = autoTestApiResult.classname,
+                steps = convertAutoTestStepApiResultsToSteps(autoTestApiResult.steps),
+                setup = convertAutoTestStepApiResultsToSteps(autoTestApiResult.setup),
+                teardown = convertAutoTestStepApiResultsToSteps(autoTestApiResult.teardown),
+                title = autoTestApiResult.title,
+                description = autoTestApiResult.description,
+                labels = convertLabelApiResultsToLabelShortModels(autoTestApiResult.labels),
+                externalKey = autoTestApiResult.externalKey,
+                globalId = autoTestApiResult.globalId,
+                isDeleted = autoTestApiResult.isDeleted,
+                mustBeApproved = autoTestApiResult.mustBeApproved,
+                createdDate = autoTestApiResult.createdDate,
+                createdById = autoTestApiResult.createdById,
+            );
+
+            return model;
+        }
+
+        private fun convertAutoTestStepApiResultsToSteps(steps: List<AutoTestStepApiResult>?): List<AutoTestStepModel> {
+            if (steps == null) {
+                return ArrayList()
+            }
+
+            return steps.stream().map { step: AutoTestStepApiResult ->
+                val model = AutoTestStepModel(
+                    title = step.title,
+                    description = step.description,
+                    steps = convertAutoTestStepApiResultsToSteps(step.steps),
+                )
+                model
+            }.collect(Collectors.toList())
+        }
+
+        private fun convertLinkApiResultsToPutLinks(links: List<LinkApiResult>?): List<LinkPutModel> {
+            if (links == null) {
+                return ArrayList()
+            }
+
+            return links.stream().map { link: LinkApiResult ->
+                val model = LinkPutModel(
+                    url = link.url,
+                    hasInfo = true,
+                    title = link.title,
+                    description = link.description,
+                    type = link.type?.let { LinkType.valueOf(it.value) }
+                )
+                model
+            }.collect(Collectors.toList())
+        }
+
+        private fun convertLabelApiResultsToLabelShortModels(labels: List<LabelApiResult>?): List<LabelShortModel> {
+            if (labels == null) {
+                return ArrayList()
+            }
+
+            return labels.stream().map { label: LabelApiResult ->
+                val model = LabelShortModel(
+                    name = label.name,
+                    globalId = label.globalId
+                )
+                model
+            }.collect(Collectors.toList())
+        }
     }
 }

@@ -54,8 +54,8 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         client.verifyingSsl = clientConfiguration.certValidation
     }
 
-    override fun createTestRun(): TestRunV2GetModel {
-        val model = TestRunV2PostShortModel(
+    override fun createTestRun(): TestRunV2ApiResult {
+        val model = CreateEmptyTestRunApiModel(
             projectId = UUID.fromString(clientConfiguration.projectId)
         )
 
@@ -162,7 +162,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     @Synchronized
-    override fun getTestRun(uuid: String): TestRunV2GetModel {
+    override fun getTestRun(uuid: String): TestRunV2ApiResult {
         return testRunsApi.getTestRunById(UUID.fromString(uuid))
     }
 
@@ -182,18 +182,18 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     @Synchronized
-    override fun getAutoTestByExternalId(externalId: String): AutoTestModel? {
+    override fun getAutoTestByExternalId(externalId: String): AutoTestApiResult? {
         val projectIds = hashSetOf(UUID.fromString(clientConfiguration.projectId))
         val externalIds = hashSetOf(externalId)
-        val filter = AutotestFilterModel(
+        val filter = AutoTestFilterApiModel(
             projectIds = projectIds,
             isDeleted = false,
             externalIds = externalIds
         )
 
-        val includes = SearchAutoTestsQueryIncludesModel(INCLUDE_STEPS, INCLUDE_LINKS, INCLUDE_LABELS)
+        val includes = AutoTestSearchIncludeApiModel(INCLUDE_STEPS, INCLUDE_LINKS, INCLUDE_LABELS)
 
-        val model = AutotestsSelectModel(filter, includes)
+        val model = AutoTestSearchApiModel(filter, includes)
 
 
         val tests = autoTestsApi.apiV2AutoTestsSearchPost(null, null, null, null, null, model)

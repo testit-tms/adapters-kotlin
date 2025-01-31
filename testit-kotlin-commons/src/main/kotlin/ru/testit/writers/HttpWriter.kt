@@ -33,9 +33,10 @@ class HttpWriter(
                 LOGGER.debug("Write auto test {}", testResultCommon.externalId)
             }
 
-            val autotest = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
+            val autoTestApiResult = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
             val workItemIds = testResultCommon.workItemIds
             var autoTestId: String? = null
+            val autotest = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult)
 
             if (autotest != null) {
                 if (LOGGER.isDebugEnabled()) {
@@ -123,7 +124,8 @@ class HttpWriter(
     override fun writeClass(container: ClassContainer): Unit = container.children.forEach { testUuid ->
         storage.getTestResult(testUuid)?.let { test ->
             try {
-                val autoTestModel = apiClient.getAutoTestByExternalId(test.get().externalId!!)
+                val autoTestApiResult = apiClient.getAutoTestByExternalId(test.get().externalId!!)
+                val autoTestModel = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult)
 
                 if (autoTestModel == null) return@forEach
 
@@ -168,7 +170,8 @@ class HttpWriter(
                     }
                     try {
                         val testResult = test.get()
-                        val autoTestModel = apiClient.getAutoTestByExternalId(testResult.externalId!!) ?: return
+                        val autoTestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!)
+                        val autoTestModel = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult) ?: return
 
                         val beforeFinish = ArrayList(beforeAll).apply {
                             if (autoTestModel.setup != null)
