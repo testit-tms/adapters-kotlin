@@ -59,8 +59,8 @@ class Converter {
 
 
         fun testResultToTestResultUpdateModel(result: TestResultResponse,
-                                              setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
-                                              teardownResults: List<AttachmentPutModelAutoTestStepResultsModel>?
+                                              setupResults: List<AutoTestStepResultUpdateRequest>?,
+                                              teardownResults: List<AutoTestStepResultUpdateRequest>?
         ): TestResultUpdateV2Request  {
             val model = TestResultUpdateV2Request (
                 duration = result.durationInMs,
@@ -70,7 +70,7 @@ class Converter {
                 failureClassIds = result.failureClassIds,
                 comment = result.comment,
                 attachments = if (result.attachments != null)
-                    convertAttachmentsFromModel(result.attachments!!) else null,
+                    convertAttachmentsFromResult(result.attachments!!) else null,
                 setupResults = setupResults,
                 teardownResults = teardownResults
             )
@@ -262,7 +262,7 @@ class Converter {
         fun convertAttachments(uuids: List<String>): List<AttachmentPutModel>? =
             uuids.map { AttachmentPutModel(id = UUID.fromString(it)) }
 
-        fun convertAttachmentsFromModel(models: List<Attachment>): List<AttachmentUpdateRequest> =
+        fun convertAttachmentsFromResult(models: List<AttachmentApiResult>): List<AttachmentUpdateRequest> =
             models.map { AttachmentUpdateRequest(id = it.id) }
 
         fun convertAutoTestApiResultToAutoTestModel(autoTestApiResult: AutoTestApiResult?): AutoTestModel? {

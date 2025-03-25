@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
 import ru.testit.kotlin.client.infrastructure.ClientException
-import ru.testit.kotlin.client.models.AttachmentPutModelAutoTestStepResultsModel
-import ru.testit.kotlin.client.models.AutoTestPutModel
-import ru.testit.kotlin.client.models.AutoTestResultsForTestRunModel
+import ru.testit.kotlin.client.models.*
 import ru.testit.models.ClassContainer
 import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
@@ -208,8 +206,11 @@ class HttpWriter(
                         val testResultId = testResults[testResult.uuid]
 
                         val resultModel = apiClient.getTestResult(testResultId!!)
+                        val beforeResult = modelToRequest(beforeResultFinish)
+                        val afterResult = modelToRequest(afterResultFinish)
+
                         val model = Converter.testResultToTestResultUpdateModel(resultModel,
-                            beforeResultFinish, afterResultFinish)
+                            beforeResult, afterResult)
 
                         apiClient.updateTestResult(testResultId, model)
 
@@ -221,6 +222,41 @@ class HttpWriter(
         }
     } catch (e: Exception) {
         LOGGER.error("Error during test writing: ${e.message}")
+    }
+
+    fun modelToRequest(models: List<AttachmentPutModelAutoTestStepResultsModel>): List<AutoTestStepResultUpdateRequest> {
+        return models.map { AutoTestStepResultUpdateRequest(
+            title = it.title,
+            description = it.description,
+            info = it.info,
+            startedOn = it.startedOn,
+            completedOn = it.completedOn,
+            duration = it.duration,
+            outcome = it.outcome,
+            stepResults = stepModelToRequest(it.stepResults),
+            attachments = attachmentModelToRequest(it.attachments),
+            parameters = it.parameters
+        ) }
+    }
+
+    fun attachmentModelToRequest(models: List<AttachmentPutModel>?): List<AttachmentUpdateRequest>? {
+        return models?.map { AttachmentUpdateRequest(
+            id = it.id
+        ) }
+    }
+
+    fun stepModelToRequest(models: List<AttachmentPutModelAutoTestStepResultsModel>?): List<AutoTestStepResultUpdateRequest>? {
+        return models?.map { AutoTestStepResultUpdateRequest(
+            title = it.title,
+            description =  it.description,
+            info = it.info,
+            startedOn = it.startedOn,
+            completedOn = it.completedOn,
+            duration = it.duration,
+            outcome = it.outcome,
+            stepResults =  if (it.stepResults?.size!! > 0) stepModelToRequest(it.stepResults)  else emptyList(),
+            attachments = attachmentModelToRequest(it.attachments)
+        ) }
     }
 
 

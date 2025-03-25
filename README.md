@@ -3,11 +3,11 @@ The repository contains new versions of adaptors for Kotlin test frameworks.
 
 ## Compatibility of Adapters and TMS
 
-| Test IT | Kotest |
-|---------|--------|
-| 5.0     | 0.1.0  |
-| 5.2     | 0.2.0  |
-| Cloud   | 0.3.0  |
+| Test IT | Kotest          |
+|---------|-----------------|
+| 5.0     | 0.1.0           |
+| 5.2     | 0.2.0           |
+| Cloud   | 0.4.0-TMS-CLOUD |
 
 Supported test frameworks :
  1. [Kotest](https://kotest.io/docs/framework/framework.html)
