@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "ru.testit"
-version = "0.3.0"
+version = "0.4.0-TMS-CLOUD"
 
 java {
     withJavadocJar()
