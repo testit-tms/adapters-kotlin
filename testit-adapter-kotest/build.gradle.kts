@@ -1,13 +1,13 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import java.lang.System.*
+
+group = "ru.testit"
+version = "0.5.0-TMS-CLOUD"
 
 plugins {
     kotlin("jvm") version "2.0.20"
     kotlin("plugin.serialization") version "2.0.20"
 }
 
-group = "ru.testit"
-version = "0.4.0-TMS-CLOUD"
 
 java {
     withJavadocJar()
