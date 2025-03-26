@@ -14,8 +14,9 @@ java {
 }
 
 val slf4jVersion = "1.7.2"
+val apiVersion = "0.6.0-TMS-CLOUD"
 dependencies {
-    implementation("ru.testit:testit-api-client-kotlin:0.6.0-TMS-CLOUD")
+    implementation("ru.testit:testit-api-client-kotlin:$apiVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
