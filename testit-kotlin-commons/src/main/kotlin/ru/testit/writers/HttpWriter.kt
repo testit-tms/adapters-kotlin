@@ -12,6 +12,7 @@ import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
 import ru.testit.models.TestResultCommon
 import ru.testit.services.ResultStorage
+import ru.testit.writers.Converter.Companion.toModel
 import java.util.Collections.addAll
 
 class HttpWriter(
@@ -34,7 +35,7 @@ class HttpWriter(
             val autoTestApiResult = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
             val workItemIds = testResultCommon.workItemIds
             var autoTestId: String? = null
-            val autotest = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult)
+            val autotest = autoTestApiResult.toModel()
 
             if (autotest != null) {
                 if (LOGGER.isDebugEnabled()) {
@@ -123,7 +124,7 @@ class HttpWriter(
         storage.getTestResult(testUuid)?.let { test ->
             try {
                 val autoTestApiResult = apiClient.getAutoTestByExternalId(test.get().externalId!!)
-                val autoTestModel = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult)
+                val autoTestModel = autoTestApiResult.toModel()
 
                 if (autoTestModel == null) return@forEach
 
@@ -169,7 +170,7 @@ class HttpWriter(
                     try {
                         val testResult = test.get()
                         val autoTestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!)
-                        val autoTestModel = Converter.convertAutoTestApiResultToAutoTestModel(autoTestApiResult) ?: return
+                        val autoTestModel = autoTestApiResult.toModel() ?: return
 
                         val beforeFinish = ArrayList(beforeAll).apply {
                             if (autoTestModel.setup != null)
