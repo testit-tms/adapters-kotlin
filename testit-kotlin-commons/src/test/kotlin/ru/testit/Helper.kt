@@ -86,44 +86,6 @@ class Helper {
             )
         }
 
-//        fun generateTestResultModel(): TestResultModel {
-//            val model = TestResultModel(
-//                UUID.randomUUID(),
-//                UUID.randomUUID(),
-//                UUID.randomUUID(),
-//                UUID.randomUUID(),
-//                UUID.randomUUID(),
-//                OffsetDateTime.now(),
-//                UUID.randomUUID(),
-//                listOf(),
-//                durationInMs = 12345L
-//            )
-////            model.durationInMs = 12345L
-//            return model
-//        }
-
-        fun generateAutoTestModel(projectId: String): AutoTestModel {
-            val model = AutoTestModel(
-                globalId = 12345L,
-                isDeleted = false,
-                mustBeApproved = false,
-                id = UUID.fromString(TEST_UUID),
-                createdDate = OffsetDateTime.now(),
-                createdById = UUID.randomUUID(),
-                externalId = EXTERNAL_ID,
-                projectId = UUID.fromString(projectId),
-                name = NAME,
-                links = generatePutLinks(),
-                steps = generateSteps(),
-                setup = emptyList(),
-                teardown = emptyList(),
-                title = TITLE,
-                description = DESCRIPTION,
-                labels = generateShortLabels(),
-            )
-            return model
-        }
-
         fun generateAutoTestApiResult(projectId: String): AutoTestApiResult {
             val model = AutoTestApiResult(
                 globalId = 12345L,

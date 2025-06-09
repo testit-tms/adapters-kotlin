@@ -248,10 +248,10 @@ class Converter {
                 .collect(Collectors.toList())
         }
 
-        fun labelsConvert(labels: List<LabelShortModel>): List<LabelPostModel> =
+        private fun labelsConvert(labels: List<LabelShortModel>): List<LabelPostModel> =
             labels.map { LabelPostModel(name = it.name) }
 
-        fun labelsPostConvert(labels: List<Label>): List<LabelPostModel> =
+        private fun labelsPostConvert(labels: List<Label>): List<LabelPostModel> =
             labels.map { LabelPostModel(name = it.name!!) }
 
         private fun dateToOffsetDateTime(time: Long): OffsetDateTime {
@@ -259,63 +259,81 @@ class Converter {
             return date.toInstant().atOffset(ZoneOffset.UTC)
         }
 
-        fun convertAttachments(uuids: List<String>): List<AttachmentPutModel>? =
+        private fun convertAttachments(uuids: List<String>): List<AttachmentPutModel>? =
             uuids.map { AttachmentPutModel(id = UUID.fromString(it)) }
 
-        fun convertAttachmentsFromResult(models: List<AttachmentApiResult>): List<AttachmentUpdateRequest> =
+        private fun convertAttachmentsFromResult(models: List<AttachmentApiResult>): List<AttachmentUpdateRequest> =
             models.map { AttachmentUpdateRequest(id = it.id) }
 
-        fun convertAutoTestApiResultToAutoTestModel(autoTestApiResult: AutoTestApiResult?): AutoTestModel? {
-            if (autoTestApiResult?.externalId == null) {
+        fun AutoTestApiResult?.toModel(): AutoTestModel? {
+            if (this?.externalId == null) {
                 return null;
             }
 
             val model = AutoTestModel(
-                id = autoTestApiResult.id,
-                externalId = autoTestApiResult.externalId!!,
-                links = convertLinkApiResultsToPutLinks(autoTestApiResult.links),
-                projectId = autoTestApiResult.projectId,
-                name = autoTestApiResult.name,
-                namespace = autoTestApiResult.namespace,
-                classname = autoTestApiResult.classname,
-                steps = convertAutoTestStepApiResultsToSteps(autoTestApiResult.steps),
-                setup = convertAutoTestStepApiResultsToSteps(autoTestApiResult.setup),
-                teardown = convertAutoTestStepApiResultsToSteps(autoTestApiResult.teardown),
-                title = autoTestApiResult.title,
-                description = autoTestApiResult.description,
-                labels = convertLabelApiResultsToLabelShortModels(autoTestApiResult.labels),
-                externalKey = autoTestApiResult.externalKey,
-                globalId = autoTestApiResult.globalId,
-                isDeleted = autoTestApiResult.isDeleted,
-                mustBeApproved = autoTestApiResult.mustBeApproved,
-                createdDate = autoTestApiResult.createdDate,
-                createdById = autoTestApiResult.createdById,
-            );
+                id = this.id,
+                externalId = this.externalId!!,
+                links = this.links.toModels(),
+                projectId = this.projectId,
+                name = this.name,
+                namespace = this.namespace,
+                classname = this.classname,
+                steps = this.steps.toModels(),
+                setup = this.setup.toModels(),
+                teardown = this.teardown.toModels(),
+                title = this.title,
+                description = this.description,
+                labels = this.labels.toModels(),
+                externalKey = this.externalKey,
+                globalId = this.globalId,
+                isDeleted = this.isDeleted,
+                mustBeApproved = this.mustBeApproved,
+                createdDate = this.createdDate,
+                createdById = this.createdById,
+                lastTestResultStatus = this.lastTestResultStatus!!.toModel()
+            )
 
             return model;
         }
 
-        private fun convertAutoTestStepApiResultsToSteps(steps: List<AutoTestStepApiResult>?): List<AutoTestStepModel> {
-            if (steps == null) {
+        private fun TestStatusApiResult.toModel(): TestStatusModel {
+            return TestStatusModel(
+                id = this.id,
+                name = this.name,
+                type = this.type.toModel(),
+                isSystem = this.isSystem,
+                code = this.code,
+                description = this.description
+            )
+        }
+
+        private fun TestStatusApiType.toModel(): TestStatusType {
+            return TestStatusType.valueOf(this.value)
+        }
+
+        @JvmName("autoTestStepApiResultToModels")
+        private fun List<AutoTestStepApiResult>?.toModels(): List<AutoTestStepModel>? {
+            if (this == null) {
                 return ArrayList()
             }
 
-            return steps.stream().map { step: AutoTestStepApiResult ->
+            return this.stream().map { step: AutoTestStepApiResult ->
                 val model = AutoTestStepModel(
                     title = step.title,
                     description = step.description,
-                    steps = convertAutoTestStepApiResultsToSteps(step.steps),
+                    steps = step.steps.toModels(),
                 )
                 model
             }.collect(Collectors.toList())
         }
 
-        private fun convertLinkApiResultsToPutLinks(links: List<LinkApiResult>?): List<LinkPutModel> {
-            if (links == null) {
+        @JvmName("linkApiResultToModels")
+        private fun List<LinkApiResult>?.toModels(): List<LinkPutModel> {
+            if (this == null) {
                 return ArrayList()
             }
 
-            return links.stream().map { link: LinkApiResult ->
+            return this.stream().map { link: LinkApiResult ->
                 val model = LinkPutModel(
                     url = link.url,
                     hasInfo = true,
@@ -327,12 +345,14 @@ class Converter {
             }.collect(Collectors.toList())
         }
 
-        private fun convertLabelApiResultsToLabelShortModels(labels: List<LabelApiResult>?): List<LabelShortModel> {
-            if (labels == null) {
+
+        @JvmName("labelApiResultToModels")
+        private fun List<LabelApiResult>?.toModels(): List<LabelShortModel> {
+            if (this == null) {
                 return ArrayList()
             }
 
-            return labels.stream().map { label: LabelApiResult ->
+            return this.stream().map { label: LabelApiResult ->
                 val model = LabelShortModel(
                     name = label.name,
                     globalId = label.globalId
