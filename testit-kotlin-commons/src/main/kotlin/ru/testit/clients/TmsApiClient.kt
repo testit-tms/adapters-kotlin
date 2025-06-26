@@ -9,6 +9,7 @@ import ru.testit.kotlin.client.apis.TestRunsApi
 import ru.testit.kotlin.client.infrastructure.ApiClient
 import kotlinx.serialization.Serializable
 import ru.testit.kotlin.client.models.*
+import ru.testit.utils.HtmlEscapeUtils
 import java.io.File
 import java.time.Duration
 import java.util.*
@@ -83,7 +84,11 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         models: List<AutoTestResultsForTestRunModel>
     ): List<String> {
         try {
-            return testRunsApi.setAutoTestResultsForTestRun(UUID.fromString(testRunUuid), models).map { it.toString() }
+            // Escape HTML in test results before sending
+            val escapedModels = models.map { model ->
+                HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
+            }
+            return testRunsApi.setAutoTestResultsForTestRun(UUID.fromString(testRunUuid), escapedModels).map { it.toString() }
         } catch (e: Exception) {
             LOGGER.error("Failed to send test results for test run $testRunUuid", e)
             throw e
@@ -138,7 +143,9 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     override fun updateTestResult(uuid: UUID, model: TestResultUpdateV2Request ) {
-        testResultsApi.apiV2TestResultsIdPut(uuid, model)
+        // Escape HTML in test result update before sending
+        val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
+        testResultsApi.apiV2TestResultsIdPut(uuid, escapedModel)
     }
 
     override fun unlinkAutoTestToWorkItem(testId: String, workItemId: String): Boolean {
@@ -173,12 +180,16 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
     @Synchronized
     override fun updateAutoTest(model: AutoTestPutModel) {
-        autoTestsApi.updateAutoTest(model)
+        // Escape HTML in autotest update before sending
+        val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
+        autoTestsApi.updateAutoTest(escapedModel)
     }
 
     @Synchronized
     override fun createAutoTest(model: AutoTestPostModel): String {
-        return requireNotNull(autoTestsApi.createAutoTest(model).id.toString())
+        // Escape HTML in autotest creation before sending
+        val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
+        return requireNotNull(autoTestsApi.createAutoTest(escapedModel).id.toString())
     }
 
     @Synchronized
