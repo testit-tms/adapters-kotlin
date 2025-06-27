@@ -22,6 +22,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("ch.qos.logback:logback-core:1.5.8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("ch.qos.logback:logback-classic:1.5.8")
     testImplementation("io.mockk:mockk:1.13.12")
     testImplementation(kotlin("test"))
