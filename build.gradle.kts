@@ -34,20 +34,28 @@ configure(subprojects) {
     group = "ru.testit"
     version = version
 
+    apply(plugin = "java")
     apply(plugin = "signing")
     apply(plugin = "maven-publish")
 
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
     repositories {
-        // JReleaser staging repository
-        maven {
-            name = "staging"
-            url = uri(layout.buildDirectory.dir("staging-deploy"))
-        }
         mavenLocal()
         mavenCentral()
     }
 
     publishing {
+        repositories {
+            // JReleaser staging repository
+            maven {
+                name = "staging"
+                url = uri(layout.buildDirectory.dir("staging-deploy"))
+            }
+        }
         
         publications {
             create<MavenPublication>("maven") {

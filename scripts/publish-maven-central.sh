@@ -96,7 +96,6 @@ fi
 
 print_success "Version updated to $VERSION"
 
-print_status "Making gradlew executable..."
 chmod +x ./gradlew
 
 # Clean previous builds
@@ -115,7 +114,9 @@ jreleaser config --assembly
 
 
 # Exit without deploy flag
-if [ -z "$DEPLOY" ]; then
+if [ "$DEPLOY" != "true" ]; then
+    print_status "Trying dry-run deployment..."
+    jreleaser deploy --dry-run
     exit 0
 fi
 

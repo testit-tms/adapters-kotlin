@@ -12,8 +12,9 @@ project:
     homepage: https://github.com/testit-tms/adapters-kotlin
     documentation: https://github.com/testit-tms/adapters-kotlin
   copyright: TestIT
-  java:
-    groupId: ru.testit
+  languages:
+    java:
+      groupId: ru.testit
 
 # Environment variables setup
 environment:
@@ -39,6 +40,7 @@ deploy:
         active: ALWAYS
         url: https://central.sonatype.com/api/v1/publisher
         stagingRepositories:
-          - "*/build/staging-deploy"
+          - "testit-kotlin-commons/build/staging-deploy"
+          - "testit-adapter-kotest/build/staging-deploy"
         retryDelay: 20
         maxRetries: 60 
