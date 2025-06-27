@@ -5,7 +5,6 @@ plugins {
     kotlin("jvm") version "2.0.20"
     `maven-publish`
     signing
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 group = "ru.testit"
@@ -31,46 +30,18 @@ kotlin {
     jvmToolchain(11)
 }
 
-val sonaUsername = providers.gradleProperty("sonatypeAccessToken")
-val sonaPassword = providers.gradleProperty("sonatypeAccessPassword")
-
-
-nexusPublishing {
-    connectTimeout.set(Duration.ofMinutes(7))
-    clientTimeout.set(Duration.ofMinutes(7))
-
-    transitionCheckOptions {
-        maxRetries.set(100)
-        delayBetween.set(Duration.ofSeconds(10))
-    }
-
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username.set(sonaUsername.get())
-            password.set(sonaPassword.get())
-        }
-    }
-}
-
 configure(subprojects) {
     group = "ru.testit"
     version = version
 
     apply(plugin = "signing")
     apply(plugin = "maven-publish")
-    // apply(plugin = "java")
-    repositories {
-        maven {
-            val releasesUrl = uri("https://s01.oss.sonatype.org/content/repositories/releases")
-            val snapshotsUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-            url = if (version.toString().toLowerCase().contains("snapshot")) snapshotsUrl else releasesUrl
 
-            credentials {
-                username = sonaUsername.get()
-                password = sonaPassword.get()
-            }
+    repositories {
+        // JReleaser staging repository
+        maven {
+            name = "staging"
+            url = uri(layout.buildDirectory.dir("staging-deploy"))
         }
         mavenLocal()
         mavenCentral()
@@ -116,14 +87,6 @@ configure(subprojects) {
         }
     }
 
-    signing {
-        // val signingKeyId: String? by project
-        // val signingKey: String? by project
-        // val signingPassword: String? by project
-        // useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-
-        sign(publishing.publications["maven"])
-    }
 
     tasks.withType<Sign>().configureEach {
         if (System.getProperty("disableSign") == "true") {
@@ -142,5 +105,35 @@ tasks.jar {
             "Implementation-Title" to project.name,
             "Implementation-Version" to project.version
         ))
+    }
+}
+
+// JReleaser helper tasks
+tasks.register("jreleaserStage") {
+    group = "publishing"
+    description = "Stages all modules for JReleaser deployment"
+    
+    doLast {
+        println("✅ All modules staged for JReleaser deployment")
+        println("📁 Staging directories:")
+        subprojects.forEach { project ->
+            val stagingDir = project.layout.buildDirectory.dir("staging-deploy").get().asFile
+            if (stagingDir.exists()) {
+                println("   ${project.name}: ${stagingDir.absolutePath}")
+            }
+        }
+        println("🚀 Run 'jreleaser deploy' to publish to Maven Central")
+    }
+}
+
+// Configure dependencies after all projects are evaluated
+afterEvaluate {
+    subprojects.forEach { project ->
+        val stagingTask = project.tasks.findByName("publishMavenPublicationToStagingRepository")
+        if (stagingTask != null) {
+            tasks.named("jreleaserStage").configure {
+                dependsOn(stagingTask)
+            }
+        }
     }
 }

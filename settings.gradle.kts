@@ -7,6 +7,7 @@ include("testit-adapter-kotest")
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        mavenCentral()
     }
     plugins {
         kotlin("jvm") version "1.6.21"
