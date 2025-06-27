@@ -1,5 +1,5 @@
 group = "ru.testit"
-version = "0.6.1-TMS-CLOUD"
+version = "0.6.2-TMS-CLOUD"
 
 plugins {
     kotlin("jvm") version "2.0.20"
