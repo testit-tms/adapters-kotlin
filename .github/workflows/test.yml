@@ -1,0 +1,87 @@
+name: e2e tests
+
+run-name: "#${{ github.run_number }} test by ${{ github.triggering_actor }}"
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+  workflow_dispatch:
+    inputs:
+        run_tests:
+          description: 'Запустить тесты'
+          required: true
+          type: boolean
+          default: true
+env:
+  DOTNET_VERSION: 8
+  GITHUB_PAT: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
+  JAVA_DISTRIBUTION: "temurin"
+  JAVA_VERSION: 17
+  PYTHON_VERSION: 3.12
+  TEMP_FILE: tmp/output.txt
+  TMS_ADAPTER_MODE: 1
+  TMS_CERT_VALIDATION: false
+  TMS_PRIVATE_TOKEN: ${{ secrets.TESTIT_PRIVATE_TOKEN }}
+  TMS_URL: ${{ secrets.TESTIT_URL }}
+  TMS_CONFIG_FILE: ${{ github.workspace }}/tms.config.json
+jobs:
+  test:
+    name: ${{ matrix.project_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - configuration_id: KOTEST_CONFIGURATION_ID
+            project_id: KOTEST_PROJECT_ID
+            project_name: kotest
+    env:
+      TMS_CONFIGURATION_ID: ${{ secrets[matrix.configuration_id] }}
+      TMS_PROJECT_ID: ${{ secrets[matrix.project_id] }}
+      TMS_TEST_RUN_NAME: ${{ matrix.project_name }} TestRun
+    steps:
+      - name: Checkout adapters-kotlin
+        uses: actions/checkout@v4
+      - name: Checkout api-validator-dotnet
+        uses: actions/checkout@v4
+        with:
+          repository: testit-tms/api-validator-dotnet
+          token: ${{ env.GITHUB_PAT }}
+          path: api-validator-dotnet
+      - name: Checkout kotlin-examples
+        uses: actions/checkout@v4
+        with:
+          repository: testit-tms/kotlin-examples
+          path: kotlin-examples
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-package: jdk
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Setup environment
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon -DdisableSign=true publishToMavenLocal
+          dotnet build --configuration Debug --property WarningLevel=0 api-validator-dotnet
+          pip install testit-cli
+      - name: Create TestRun
+        run: |
+          testit testrun create --token ${{ env.TMS_PRIVATE_TOKEN }} --output ${{ env.TEMP_FILE }}
+          echo "TMS_TEST_RUN_ID=$(<${{ env.TEMP_FILE }})" >> $GITHUB_ENV
+      - name: Test
+        run: |
+          cd kotlin-examples/kotest-adapter
+          chmod +x ./gradlew
+          ./gradlew test --no-daemon || exit 0
+      - name: Validate
+        run: |
+          dotnet test --configuration Debug --no-build --logger:"console;verbosity=detailed" api-validator-dotnet

@@ -101,9 +101,8 @@ class TestItWriter () {
         stopContainers(rootTestName)
     }
 
-
     /**
-     * Do nothing in step flow.
+     * Do nothing in step flow. 
      * Checks for registered extensions and register them in Test IT.
      *
      * Interested in  [io.kotest.core.listeners.BeforeTestListener] and
