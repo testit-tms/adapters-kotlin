@@ -290,7 +290,8 @@ class Converter {
                 mustBeApproved = this.mustBeApproved,
                 createdDate = this.createdDate,
                 createdById = this.createdById,
-                lastTestResultStatus = this.lastTestResultStatus!!.toModel()
+                lastTestResultStatus = if (this.lastTestResultStatus != null)
+                    this.lastTestResultStatus!!.toModel() else null
             )
 
             return model;
