@@ -24,6 +24,7 @@ env:
   TMS_PRIVATE_TOKEN: ${{ secrets.TESTIT_PRIVATE_TOKEN }}
   TMS_URL: ${{ secrets.TESTIT_URL }}
   TMS_CONFIG_FILE: ${{ github.workspace }}/tms.config.json
+  TMS_OVERWRITE_EXPECTED: false
 jobs:
   test:
     name: ${{ matrix.project_name }}
