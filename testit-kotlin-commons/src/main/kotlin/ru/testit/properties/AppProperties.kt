@@ -33,6 +33,7 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         TEST_RUN_NAME to "TMS_TEST_RUN_NAME",
         ADAPTER_MODE to "TMS_ADAPTER_MODE",
         AUTOMATIC_CREATION_TEST_CASES to "TMS_AUTOMATIC_CREATION_TEST_CASES",
+        AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES to "TMS_AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES",
         CERT_VALIDATION to "TMS_CERT_VALIDATION",
         TMS_INTEGRATION to "TMS_TEST_IT"
     ),
@@ -45,6 +46,7 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         TEST_RUN_NAME to "tmsTestRunName",
         ADAPTER_MODE to "tmsAdapterMode",
         AUTOMATIC_CREATION_TEST_CASES to "tmsAutomaticCreationTestCases",
+        AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES to "tmsAutomaticUpdationLinksToTestCases",
         CERT_VALIDATION to "tmsCertValidation",
         TMS_INTEGRATION to "tmsTestIt"
     )
