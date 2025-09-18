@@ -1,7 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 group = "ru.testit"
-version = "0.6.6"
+version = "0.6.7"
 
 plugins {
     kotlin("jvm") version "2.0.20"
