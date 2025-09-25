@@ -64,7 +64,7 @@ class Converter {
         ): TestResultUpdateV2Request  {
             val model = TestResultUpdateV2Request (
                 duration = result.durationInMs,
-                outcome = result.outcome,
+                statusCode = result.status!!.code,
                 links = result.links,
                 stepResults = result.stepResults,
                 failureClassIds = result.failureClassIds,
@@ -159,7 +159,7 @@ class Converter {
             val model = AutoTestResultsForTestRunModel(
                 configurationId = configurationId ?: UUID.fromString(result.uuid),
                 autoTestExternalId = result.externalId!!,
-                outcome = AvailableTestResultOutcome.valueOf(result.itemStatus?.value!!),
+                statusCode = result.itemStatus?.value!!,
                 links = convertPostLinks(result.resultLinks),
                 startedOn = dateToOffsetDateTime(result.start!!),
                 completedOn = dateToOffsetDateTime(result.stop!!),
