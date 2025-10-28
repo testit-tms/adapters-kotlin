@@ -10,7 +10,7 @@ The repository contains new versions of adaptors for Kotlin test frameworks.
 | 5.3     | 0.5.1-TMS-5.3   |
 | 5.4     | 0.6.3-TMS-5.4   |
 | 5.5     | 0.7.1-TMS-5.5   |
-| Cloud   | 0.6.7           |
+| Cloud   | 0.7.2           |
 
 Supported test frameworks :
  1. [Kotest](https://kotest.io/docs/framework/framework.html)

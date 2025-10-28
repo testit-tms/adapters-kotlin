@@ -113,7 +113,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
             for (attempts in 0 until MAX_TRIES) {
                 try {
-                    autoTestsApi.linkAutoTestToWorkItem(id, WorkItemIdModel(workItemId))
+                    autoTestsApi.linkAutoTestToWorkItem(id, WorkItemIdApiModel(workItemId))
                     LOGGER.debug("Link autotest {} to workitem {} is successfully", id, workItemId)
                     break
                 } catch (e: Exception) {

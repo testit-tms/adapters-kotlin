@@ -1,5 +1,5 @@
 group = "ru.testit"
-version = "0.7.1-TMS-5.5"
+version = "0.7.2"
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -14,7 +14,7 @@ java {
 }
 
 val slf4jVersion = "1.7.2"
-val apiVersion = "0.7.8-TMS-5.5"
+val apiVersion = "0.7.9"
 dependencies {
     implementation("ru.testit:testit-api-client-kotlin:$apiVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
