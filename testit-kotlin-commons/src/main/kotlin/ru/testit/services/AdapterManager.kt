@@ -67,6 +67,9 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Test run is exist.")
                 }
+
+                this.client.updateTestRun()
+
                 return
             }
 

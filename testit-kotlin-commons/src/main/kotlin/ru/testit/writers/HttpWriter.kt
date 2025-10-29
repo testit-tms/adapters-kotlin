@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
+import ru.testit.clients.Converter
 import ru.testit.kotlin.client.infrastructure.ClientException
 import ru.testit.kotlin.client.models.*
 import ru.testit.models.ClassContainer
@@ -12,7 +13,7 @@ import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
 import ru.testit.models.TestResultCommon
 import ru.testit.services.ResultStorage
-import ru.testit.writers.Converter.Companion.toModel
+import ru.testit.clients.Converter.Companion.toModel
 import java.util.Collections.addAll
 
 class HttpWriter(

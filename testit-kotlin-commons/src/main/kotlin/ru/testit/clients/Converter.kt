@@ -1,15 +1,47 @@
-package ru.testit.writers
+package ru.testit.clients
 
-import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.client.models.AssignAttachmentApiModel
+import ru.testit.kotlin.client.models.AttachmentApiResult
+import ru.testit.kotlin.client.models.AttachmentPutModel
+import ru.testit.kotlin.client.models.AttachmentPutModelAutoTestStepResultsModel
+import ru.testit.kotlin.client.models.AttachmentUpdateRequest
+import ru.testit.kotlin.client.models.AutoTestApiResult
+import ru.testit.kotlin.client.models.AutoTestModel
+import ru.testit.kotlin.client.models.AutoTestPostModel
+import ru.testit.kotlin.client.models.AutoTestPutModel
+import ru.testit.kotlin.client.models.AutoTestResultsForTestRunModel
+import ru.testit.kotlin.client.models.AutoTestStepApiResult
+import ru.testit.kotlin.client.models.AutoTestStepModel
+import ru.testit.kotlin.client.models.AutoTestStepResultUpdateRequest
+import ru.testit.kotlin.client.models.AvailableTestResultOutcome
+import ru.testit.kotlin.client.models.LabelApiResult
+import ru.testit.kotlin.client.models.LabelPostModel
+import ru.testit.kotlin.client.models.LabelShortModel
+import ru.testit.kotlin.client.models.LinkApiResult
+import ru.testit.kotlin.client.models.LinkPostModel
+import ru.testit.kotlin.client.models.LinkPutModel
 import ru.testit.kotlin.client.models.LinkType
-import ru.testit.models.*
+import ru.testit.kotlin.client.models.TestResultResponse
+import ru.testit.kotlin.client.models.TestResultUpdateV2Request
+import ru.testit.kotlin.client.models.TestRunV2ApiResult
+import ru.testit.kotlin.client.models.TestStatusApiResult
+import ru.testit.kotlin.client.models.TestStatusApiType
+import ru.testit.kotlin.client.models.TestStatusModel
+import ru.testit.kotlin.client.models.TestStatusType
+import ru.testit.kotlin.client.models.UpdateEmptyTestRunApiModel
+import ru.testit.kotlin.client.models.UpdateLinkApiModel
+import ru.testit.models.FixtureResult
 import ru.testit.models.Label
+import ru.testit.models.LinkItem
 import ru.testit.models.StepResult
+import ru.testit.models.TestResultCommon
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.ArrayList
+import java.util.Date
+import java.util.Objects
+import java.util.UUID
 import java.util.stream.Collectors
-
 
 class Converter {
 
@@ -61,8 +93,8 @@ class Converter {
         fun testResultToTestResultUpdateModel(result: TestResultResponse,
                                               setupResults: List<AutoTestStepResultUpdateRequest>?,
                                               teardownResults: List<AutoTestStepResultUpdateRequest>?
-        ): TestResultUpdateV2Request  {
-            val model = TestResultUpdateV2Request (
+        ): TestResultUpdateV2Request {
+            val model = TestResultUpdateV2Request(
                 duration = result.durationInMs,
                 statusCode = result.status!!.code,
                 links = result.links,
@@ -139,7 +171,7 @@ class Converter {
                 labels = labelsConvert(autoTestModel.labels!!),
                 isFlaky = isFlaky,
 
-            )
+                )
             return model
         }
 
@@ -360,6 +392,29 @@ class Converter {
                 )
                 model
             }.collect(Collectors.toList())
+        }
+
+        public fun TestRunV2ApiResult.toModel(name: String): UpdateEmptyTestRunApiModel {
+            return UpdateEmptyTestRunApiModel(
+                id = this.id,
+                name = name,
+                description = this.description,
+                launchSource = this.launchSource,
+                attachments = this.attachments.stream().map { attachment: AttachmentApiResult ->
+                    val model = AssignAttachmentApiModel(id = attachment.id)
+                    model
+                }.collect(Collectors.toList()),
+                links = this.links.stream().map { link: LinkApiResult ->
+                    val model = UpdateLinkApiModel(
+                        id = link.id,
+                        url = link.url,
+                        title = link.title,
+                        description = link.description,
+                        hasInfo = link.hasInfo,
+                    )
+                    model
+                }.collect(Collectors.toList()),
+            )
         }
     }
 }
