@@ -13,6 +13,10 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun updateTestRun()
+
+    @Throws(IllegalStateException::class, IOException::class,
+        UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun getTestRun(uuid: String): TestRunV2ApiResult
 
     @Throws(IllegalStateException::class, IOException::class,

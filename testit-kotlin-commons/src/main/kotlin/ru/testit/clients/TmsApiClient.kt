@@ -8,6 +8,7 @@ import ru.testit.kotlin.client.apis.TestResultsApi
 import ru.testit.kotlin.client.apis.TestRunsApi
 import ru.testit.kotlin.client.infrastructure.ApiClient
 import kotlinx.serialization.Serializable
+import ru.testit.clients.Converter.Companion.toModel
 import ru.testit.kotlin.client.models.*
 import ru.testit.utils.HtmlEscapeUtils
 import java.io.File
@@ -57,7 +58,8 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
     override fun createTestRun(): TestRunV2ApiResult {
         val model = CreateEmptyTestRunApiModel(
-            projectId = UUID.fromString(clientConfiguration.projectId)
+            projectId = UUID.fromString(clientConfiguration.projectId),
+            name = if (clientConfiguration.testRunName != "null") clientConfiguration.testRunName else null
         )
 
         LOGGER.debug("Create new test run: {}", model);
@@ -68,6 +70,26 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         }
 
         return response
+    }
+
+    override fun updateTestRun() {
+        LOGGER.debug("Update test run: {}", clientConfiguration.testRunId);
+
+        if (clientConfiguration.testRunName == "null") {
+            return;
+        }
+
+        val testRun = this.getTestRun(clientConfiguration.testRunId)
+
+        if (testRun.name == clientConfiguration.testRunName) {
+            return;
+        }
+
+        val model = testRun.toModel(clientConfiguration.testRunName)
+
+        testRunsApi.updateEmpty(model)
+
+        LOGGER.debug("The test run updated")
     }
 
     override fun getWorkItemsLinkedToTest(testId: String): List<WorkItemIdentifierModel> {
