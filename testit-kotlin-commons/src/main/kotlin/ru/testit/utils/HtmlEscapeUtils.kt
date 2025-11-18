@@ -17,8 +17,8 @@ object HtmlEscapeUtils {
     private val htmlTagPattern = Regex("<\\S.*?(?:>|/>)")
     
     // Regex patterns to escape only non-escaped characters
-    private val lessThanPattern = Regex("(?<!\\\\)<")
-    private val greaterThanPattern = Regex("(?<!\\\\)>")
+    private val lessThanPattern = Regex("<")
+    private val greaterThanPattern = Regex(">")
 
     /**
      * Escapes HTML tags to prevent XSS attacks.
@@ -41,8 +41,8 @@ object HtmlEscapeUtils {
         }
 
         // Use regex with negative lookbehind to escape only non-escaped characters
-        var result = lessThanPattern.replace(text, "\\\\<")
-        result = greaterThanPattern.replace(result, "\\\\>")
+        var result = lessThanPattern.replace(text, "&lt;")
+        result = greaterThanPattern.replace(result, "&gt;")
 
         return result
     }

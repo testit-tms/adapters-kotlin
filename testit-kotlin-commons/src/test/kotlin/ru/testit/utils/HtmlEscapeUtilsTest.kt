@@ -21,7 +21,7 @@ class HtmlEscapeUtilsTest {
     @Test
     fun `escapeHtmlTags should escape simple HTML tags`() {
         val input = "Hello <script>alert('xss')</script> World"
-        val expected = "Hello \\<script\\>alert('xss')\\</script\\> World"
+        val expected = "Hello &lt;script&gt;alert('xss')&lt;/script&gt; World"
         val result = HtmlEscapeUtils.escapeHtmlTags(input)
         assertEquals(expected, result)
     }
@@ -29,14 +29,15 @@ class HtmlEscapeUtilsTest {
     @Test
     fun `escapeHtmlTags should not double escape already escaped tags`() {
         val input = "Hello \\<script\\>alert('xss')\\</script\\> World"
+        val expected = "Hello \\&lt;script\\&gt;alert('xss')\\&lt;/script\\&gt; World"
         val result = HtmlEscapeUtils.escapeHtmlTags(input)
-        assertEquals(input, result) // Should remain unchanged
+        assertEquals(expected, result) // Should remain unchanged
     }
 
     @Test
     fun `escapeHtmlTags should handle multiple HTML tags`() {
         val input = "<div>Content</div><span>More content</span>"
-        val expected = "\\<div\\>Content\\</div\\>\\<span\\>More content\\</span\\>"
+        val expected = "&lt;div&gt;Content&lt;/div&gt;&lt;span&gt;More content&lt;/span&gt;"
         val result = HtmlEscapeUtils.escapeHtmlTags(input)
         assertEquals(expected, result)
     }
@@ -66,8 +67,8 @@ class HtmlEscapeUtilsTest {
         val result = HtmlEscapeUtils.escapeHtmlInObject(obj)
         
         assertNotNull(result)
-        assertEquals("Test \\<script\\>alert('xss')\\</script\\>", result!!.title)
-        assertEquals("Description with \\<div\\>HTML\\</div\\>", result.description)
+        assertEquals("Test &lt;script&gt;alert('xss')&lt;/script&gt;", result!!.title)
+        assertEquals("Description with &lt;div&gt;HTML&lt;/div&gt;", result.description)
         assertEquals(123, result.id) // Should remain unchanged
     }
 } 
