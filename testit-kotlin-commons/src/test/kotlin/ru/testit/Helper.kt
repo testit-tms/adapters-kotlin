@@ -312,7 +312,7 @@ class Helper {
 
             val link = LinkPutModel(
                 title = LINK_TITLE,
-                hasInfo = true,
+                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
                 type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
@@ -328,7 +328,7 @@ class Helper {
 
             val link = LinkApiResult(
                 title = LINK_TITLE,
-                hasInfo = true,
+                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
                 type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
@@ -344,7 +344,7 @@ class Helper {
 
             val link = LinkPostModel(
                 title = LINK_TITLE,
-                hasInfo = true,
+                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
                 type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)

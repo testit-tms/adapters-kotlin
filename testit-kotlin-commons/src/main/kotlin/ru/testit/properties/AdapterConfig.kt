@@ -5,7 +5,7 @@ import java.util.Properties
 
 @Serializable
 data class AdapterConfig(
-    private var mode: AdapterMode = AdapterMode.USE_FILTER,
+    private var mode: AdapterMode = AdapterMode.DEFAULT_UNIMPLEMENTED,
     var automaticCreationTestCases: Boolean = false,
     var tmsIntegration: Boolean = true
 ) {
@@ -14,7 +14,7 @@ data class AdapterConfig(
             val modeValue = properties.getProperty(AppProperties.ADAPTER_MODE).toString()
             this.mode = AdapterMode.valueOf(modeValue)
         } catch (e: Exception) {
-            this.mode = AdapterMode.USE_FILTER
+            this.mode = AdapterMode.DEFAULT_UNIMPLEMENTED
         }
 
         try {

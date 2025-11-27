@@ -537,7 +537,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         }
     }
 
-    fun isFilteredMode() = adapterConfig.getMode() == AdapterMode.USE_FILTER
+    fun isFilteredMode() = adapterConfig.getMode() == AdapterMode.DEFAULT_UNIMPLEMENTED
 
     fun getTestFromTestRun(): List<String> {
         if (adapterConfig.shouldEnableTmsIntegration()) {
