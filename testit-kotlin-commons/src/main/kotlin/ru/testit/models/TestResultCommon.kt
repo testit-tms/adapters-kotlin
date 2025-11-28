@@ -8,6 +8,7 @@ import ru.testit.services.Utils
 data class TestResultCommon(
     var uuid: String? = null,
     var externalId: String = "",
+    var externalKey: String = "",
     var workItemIds: MutableList<String> = mutableListOf<String>(),
     var className: String = "",
     var spaceName: String = "",
@@ -69,4 +70,3 @@ data class TestResultCommon(
             .toString()
     }
 }
-

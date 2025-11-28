@@ -31,17 +31,22 @@ class TestService (
     private val debug = AdapterUtils.debug(LOGGER)
 
     fun onTestStart(testCase: TestCase, uuid: String) {
-        var fullName: String
+        val fullName: String
         if (testCase.parent?.name?.testName == "") fullName = formatter.format(testCase)
         else fullName = formatter.formatTestPath(testCase, " / ")
-        var spaceName : String = testCase.spec.javaClass.packageName
-        var className: String = testCase.spec.javaClass.simpleName
+        val spaceName : String = testCase.spec.javaClass.packageName
+        val className: String = testCase.spec.javaClass.simpleName
+        // var methodName: String = testCase.name.testName
+        // why wildcart? Because in kotlin with gradle there is an issue with running
+        // by test name in many notations
+        val externalKey = "\"$spaceName.$className.*"
         val result = ru.testit.models.TestResultCommon(
             uuid = uuid,
             className = className,
             name = testCase.name.testName,
             spaceName = spaceName,
             externalId = Utils.genExternalID(fullName),
+            externalKey = externalKey,
             labels = Utils.defaultLabels(),
             linkItems = Utils.defaultLinks()
         )
@@ -57,9 +62,9 @@ class TestService (
      * @see onTestSuccessful
      */
     fun stopTestWithResult(testCase: TestCase, result: TestResult) {
-        var isContainer = testCase.type.name == "Container"
-        var isStepContainer = isContainer && testCase.isStepContainer()
-        var executableTest = executableTestService.getTest()
+        val isContainer = testCase.type.name == "Container"
+        val isStepContainer = isContainer && testCase.isStepContainer()
+        val executableTest = executableTestService.getTest()
         var path = testCase.descriptor.path()
         if (path.value == "") path = TestPath(testCase.descriptor.id.value)
         val uuid = uuids[path] ?: "Unknown test ${testCase.descriptor}"

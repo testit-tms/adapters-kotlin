@@ -2,6 +2,7 @@ package ru.testit.properties
 
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.security.InvalidKeyException
 import java.util.*
 
 
@@ -139,9 +140,14 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         }
 
 
-        val adapterMode = properties.getProperty(varNames[ADAPTER_MODE])?.toIntOrNull()
+        var adapterMode = properties.getProperty(varNames[ADAPTER_MODE])?.toIntOrNull()
         if (adapterMode != null && 0 <= adapterMode && adapterMode <= 2) {
             result[ADAPTER_MODE] = adapterMode.toString()
+        }
+        // fallback 0 -> 1
+        if (adapterMode == 0) {
+            log.warn("Invalid adapterMode: 0. Use default value instead: 1")
+            result[ADAPTER_MODE] = "1"
         }
 
 
@@ -196,9 +202,14 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         var adapterMode = 0
         try {
             adapterMode = adapterModeStr?.toInt() ?: 0
+            if (adapterMode == 0) {
+                log.warn("adapterMode 0 is not allowed for current version of kotest adapter. " +
+                        "Use default value instead: 1")
+                properties.setProperty(ADAPTER_MODE, "1")
+            }
         } catch (e: Exception) {
-            log.warn("Invalid adapterMode: ${adapterModeStr}. Use default value instead: 0", e)
-            properties.setProperty(ADAPTER_MODE, "0")
+            log.warn("Invalid adapterMode: ${adapterModeStr}. Use default value instead: 1", e)
+            properties.setProperty(ADAPTER_MODE, "1")
         }
 
         val testRunId = properties.getProperty(TEST_RUN_ID)

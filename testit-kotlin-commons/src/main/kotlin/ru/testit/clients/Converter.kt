@@ -1,6 +1,7 @@
 package ru.testit.clients
 
 import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.client.models.LinkType
 import ru.testit.models.*
 import ru.testit.models.Label
 import ru.testit.models.LinkItem
@@ -18,6 +19,7 @@ class Converter {
         fun testResultToAutoTestPostModel(result: TestResultCommon, projectId: UUID?): AutoTestPostModel {
             val model = AutoTestPostModel(
                 externalId = result.externalId!!,
+                externalKey = result.externalKey,
                 projectId = projectId ?: UUID.fromString(result.uuid),
                 name = result.name!!,
                 description = result.description,
@@ -40,6 +42,7 @@ class Converter {
                                          isFlaky: Boolean?): AutoTestPutModel {
             val model = AutoTestPutModel(
                 externalId = result.externalId!!,
+                externalKey = result.externalKey,
                 projectId = projectId ?: UUID.fromString(result.uuid),
                 description = result.description,
                 name = result.name!!,
@@ -126,6 +129,7 @@ class Converter {
             val model = AutoTestPutModel(
                 id = autoTestModel.id,
                 externalId = autoTestModel.externalId,
+                externalKey = autoTestModel.externalKey,
                 links = links ?: autoTestModel.links,
                 projectId = autoTestModel.projectId,
                 name = autoTestModel.name,
@@ -180,8 +184,7 @@ class Converter {
             links.map {
                 val model = LinkPostModel(
                     url = it.url,
-                    // TODO: check about hasInfo ?
-                    hasInfo = true,
+                    hasInfo = false,
                     title = it.title,
                     description = it.description,
                     type = LinkType.valueOf(it.type.value)
@@ -193,7 +196,7 @@ class Converter {
             links.map {
                 val model = LinkPutModel(
                     url = it.url,
-                    hasInfo = true,
+                    hasInfo = false,
                     title = it.title,
                     description = it.description,
                     type = LinkType.valueOf(it.type.value)
@@ -337,7 +340,7 @@ class Converter {
             return this.stream().map { link: LinkApiResult ->
                 val model = LinkPutModel(
                     url = link.url,
-                    hasInfo = true,
+                    hasInfo = false,
                     title = link.title,
                     description = link.description,
                     type = link.type?.let { LinkType.valueOf(it.value) }
