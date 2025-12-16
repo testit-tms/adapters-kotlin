@@ -8,47 +8,47 @@
 
 ```mermaid
 flowchart TD
-    A0["Репортер Test IT (TestItReporter)
+    A0["TestItReporter
 "]
-    A1["Запись Результатов (TestItWriter)
+    A1["TestItWriter
 "]
-    A2["Менеджер Адаптера (AdapterManager)
+    A2["AdapterManager
 "]
-    A3["Модель Результата Теста (TestResultCommon)
+    A3["TestResultCommon
 "]
-    A4["Контекст Теста (TestItContext)
+    A4["TestItContext
 "]
-    A5["API Клиент TMS (TmsApiClient)
+    A5["TmsApiClient
 "]
-    A6["Запись Результатов по HTTP (HttpWriter)
+    A6["HttpWriter
 "]
-    A7["Конфигурация Адаптера и Клиента (AdapterConfig, ClientConfiguration)
+    A7["AdapterConfig
 "]
-    A8["Сервис Тестов (TestService)
+    A8["TestService
 "]
-    A0 -- "Передает события тестов" --> A1
-    A1 -- "Использует для управления т..." --> A2
-    A1 -- "Вызывает для обработки собы..." --> A8
-    A1 -- "Получает метаданные из" --> A4
-    A2 -- "Использует для запросов к TMS" --> A5
-    A2 -- "Использует для отправки рез..." --> A6
-    A2 -- "Конфигурируется через" --> A7
-    A4 -- "Дополняет метаданные для" --> A3
-    A6 -- "Преобразует и отправляет" --> A3
-    A6 -- "Отправляет данные через" --> A5
-    A8 -- "Сообщает о событиях теста" --> A2
+    A0 -- "Send events" --> A1
+    A1 -- "Using" --> A2
+    A1 -- "Call" --> A8
+    A1 -- "Get meta" --> A4
+    A2 -- "Using" --> A5
+    A2 -- "Using" --> A6
+    A2 -- "Configure" --> A7
+    A4 -- "Add meta" --> A3
+    A6 -- "Transform and send" --> A3
+    A6 -- "Send data" --> A5
+    A8 -- "Calls" --> A2
 ```
 
 ## Chapters
 
 1. [Менеджер Адаптера (AdapterManager)
-](01_менеджер_адаптера__adaptermanager__.md)
+](01_менеджер_адаптера.md)
 2. [Конфигурация Адаптера и Клиента (AdapterConfig, ClientConfiguration)
-](02_конфигурация_адаптера_и_клиента__adapterconfig__clientconfiguration__.md)
+](02_конфигурация_адаптера.md)
 3. [Репортер Test IT (TestItReporter)
-](03_репортер_test_it__testitreporter__.md)
+](03_репортер.md)
 4. [Запись Результатов (TestItWriter)
-](04_запись_результатов__testitwriter__.md)
+](04_запись_результатов.md)
 5. [Сервис Тестов (TestService)
 ](05_сервис_тестов__testservice__.md)
 6. [Контекст Теста (TestItContext)
@@ -56,7 +56,7 @@ flowchart TD
 7. [Модель Результата Теста (TestResultCommon)
 ](07_модель_результата_теста__testresultcommon__.md)
 8. [Запись Результатов по HTTP (HttpWriter)
-](08_запись_результатов_по_http__httpwriter__.md)
+](08_запись_результатов.md)
 9. [API Клиент TMS (TmsApiClient)
 ](09_api_клиент_tms__tmsapiclient__.md)
 
