@@ -132,9 +132,9 @@ interface ApiClient {
     // Получить автотест по его externalId
     fun getAutoTestByExternalId(externalId: String): AutoTestApiResult?
     // Создать новый автотест
-    fun createAutoTest(model: AutoTestPostModel): String
+    fun createAutoTest(model: AutoTestCreateApiModel): String
     // Обновить существующий автотест
-    fun updateAutoTest(model: AutoTestPutModel)
+    fun updateAutoTest(model: AutoTestUpdateApiModel)
     // Связать автотест с work item'ами
     fun linkAutoTestToWorkItems(id: String, workItemIds: Iterable<String>)
     // ... и другие методы для работы с API Test IT ...

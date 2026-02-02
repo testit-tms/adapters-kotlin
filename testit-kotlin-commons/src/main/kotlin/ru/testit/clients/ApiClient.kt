@@ -25,11 +25,11 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun updateAutoTest(model: AutoTestPutModel)
+    fun updateAutoTest(model: AutoTestUpdateApiModel)
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun createAutoTest(model: AutoTestPostModel): String
+    fun createAutoTest(model: AutoTestCreateApiModel): String
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
@@ -45,7 +45,7 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun getWorkItemsLinkedToTest(id: String): List<WorkItemIdentifierModel>
+    fun getWorkItemsLinkedToTest(id: String): List<AutoTestWorkItemIdentifierApiResult>
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
