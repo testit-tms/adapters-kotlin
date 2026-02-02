@@ -92,7 +92,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         LOGGER.debug("The test run updated")
     }
 
-    override fun getWorkItemsLinkedToTest(testId: String): List<WorkItemIdentifierModel> {
+    override fun getWorkItemsLinkedToTest(testId: String): List<AutoTestWorkItemIdentifierApiResult> {
         try {
             return autoTestsApi.getWorkItemsLinkedToAutoTest(testId, false, false)
         } catch (e: Exception) {
@@ -201,14 +201,14 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     @Synchronized
-    override fun updateAutoTest(model: AutoTestPutModel) {
+    override fun updateAutoTest(model: AutoTestUpdateApiModel) {
         // Escape HTML in autotest update before sending
         val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
         autoTestsApi.updateAutoTest(escapedModel)
     }
 
     @Synchronized
-    override fun createAutoTest(model: AutoTestPostModel): String {
+    override fun createAutoTest(model: AutoTestCreateApiModel): String {
         // Escape HTML in autotest creation before sending
         val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
         return requireNotNull(autoTestsApi.createAutoTest(escapedModel).id.toString())

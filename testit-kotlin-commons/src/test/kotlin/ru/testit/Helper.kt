@@ -109,8 +109,8 @@ class Helper {
             return model
         }
 
-        fun generateAutoTestPutModel(projectId: String): AutoTestPutModel {
-            val model = AutoTestPutModel(
+        fun generateAutoTestPutModel(projectId: String): AutoTestUpdateApiModel {
+            val model = AutoTestUpdateApiModel(
                 externalId = EXTERNAL_ID,
                 projectId = UUID.fromString(projectId),
                 name = NAME,
@@ -118,7 +118,7 @@ class Helper {
                 description = DESCRIPTION,
                 classname = CLASS_NAME,
                 namespace = SPACE_NAME,
-                steps = generateSteps(),
+                steps = generateStepsToApiModel(),
                 links = generatePutLinks(),
                 labels = generatePostLabels(),
                 setup = emptyList(),
@@ -129,8 +129,8 @@ class Helper {
             return model
         }
 
-        fun generateAutoTestPostModel(projectId: String): AutoTestPostModel {
-            val model = AutoTestPostModel(
+        fun generateAutoTestPostModel(projectId: String): AutoTestCreateApiModel {
+            val model = AutoTestCreateApiModel(
                 externalId = EXTERNAL_ID,
                 projectId = UUID.fromString(projectId),
                 name = NAME,
@@ -138,7 +138,7 @@ class Helper {
                 description = DESCRIPTION,
                 classname = CLASS_NAME,
                 namespace = SPACE_NAME,
-                steps = generateSteps(),
+                steps = generateStepsToApiModel(),
                 links = generatePostLinks(),
                 labels = generatePostLabels(),
                 shouldCreateWorkItem = false
@@ -296,10 +296,10 @@ class Helper {
             return labels
         }
 
-        private fun generatePostLabels(): List<LabelPostModel> {
-            val labels = mutableListOf<LabelPostModel>()
+        private fun generatePostLabels(): List<LabelApiModel> {
+            val labels = mutableListOf<LabelApiModel>()
 
-            val label = LabelPostModel(
+            val label = LabelApiModel(
                 name = LABEL_NAME
             )
             labels.add(label)
@@ -307,10 +307,10 @@ class Helper {
             return labels
         }
 
-        private fun generatePutLinks(): List<LinkPutModel> {
-            val links = mutableListOf<LinkPutModel>()
+        private fun generatePutLinks(): List<LinkUpdateApiModel> {
+            val links = mutableListOf<LinkUpdateApiModel>()
 
-            val link = LinkPutModel(
+            val link = LinkUpdateApiModel(
                 title = LINK_TITLE,
                 hasInfo = false,
                 description = LINK_DESCRIPTION,
@@ -339,10 +339,10 @@ class Helper {
             return links
         }
 
-        private fun generatePostLinks(): List<LinkPostModel> {
-            val links = mutableListOf<LinkPostModel>()
+        private fun generatePostLinks(): List<LinkCreateApiModel> {
+            val links = mutableListOf<LinkCreateApiModel>()
 
-            val link = LinkPostModel(
+            val link = LinkCreateApiModel(
                 title = LINK_TITLE,
                 hasInfo = false,
                 description = LINK_DESCRIPTION,
@@ -359,6 +359,19 @@ class Helper {
             val steps = mutableListOf<AutoTestStepModel>()
 
             val step = AutoTestStepModel(
+                title = STEP_TITLE,
+                description = STEP_DESCRIPTION,
+                steps = ArrayList()
+            )
+
+            steps.add(step)
+            return steps
+        }
+
+        private fun generateStepsToApiModel(): List<AutoTestStepApiModel> {
+            val steps = mutableListOf<AutoTestStepApiModel>()
+
+            val step = AutoTestStepApiModel(
                 title = STEP_TITLE,
                 description = STEP_DESCRIPTION,
                 steps = ArrayList()
