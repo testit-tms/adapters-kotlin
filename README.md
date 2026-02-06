@@ -11,7 +11,7 @@ The repository contains new versions of adaptors for Kotlin test frameworks.
 | 5.4     | 0.6.3-TMS-5.4 |
 | 5.5     | 0.7.1-TMS-5.5 |
 | 5.6     | 0.8.0-TMS-5.6 |
-| Cloud   | 0.8.0 +       |
+| Cloud   | 0.9.0 +       |
 
 1. For current versions, see the releases tab. 
 2. Starting with 5.2, we have added a TMS postscript, which means that the utility is compatible with a specific enterprise version. 
