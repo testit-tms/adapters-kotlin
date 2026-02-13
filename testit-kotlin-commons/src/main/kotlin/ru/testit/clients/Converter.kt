@@ -293,38 +293,37 @@ class Converter {
         private fun convertAttachmentsFromResult(models: List<AttachmentApiResult>): List<AttachmentUpdateRequest> =
             models.map { AttachmentUpdateRequest(id = it.id) }
 
-//        fun AutoTestApiResult?.toModel(): AutoTestModel? {
-//            if (this?.externalId == null) {
-//                return null;
-//            }
-//
-//            val model = AutoTestModel(
-//                id = this.id,
-//                externalId = this.externalId!!,
-//                links = this.links.toPutModels(),
-//                projectId = this.projectId,
-//                name = this.name,
-//                namespace = this.namespace,
-//                classname = this.classname,
-//                steps = this.steps.toStepModels(),
-//                setup = this.setup.toStepModels(),
-//                teardown = this.teardown.toStepModels(),
-//                title = this.title,
-//                description = this.description,
-//                labels = this.labels.toPutModels(),
-//                tags = this.tags,
-//                externalKey = this.externalKey,
-//                globalId = this.globalId,
-//                isDeleted = this.isDeleted,
-//                mustBeApproved = this.mustBeApproved,
-//                createdDate = this.createdDate,
-//                createdById = this.createdById,
-//                lastTestResultStatus = if (this.lastTestResultStatus != null)
-//                    this.lastTestResultStatus!!.toModel() else null
-//            )
-//
-//            return model;
-//        }
+        fun AutoTestApiResult?.toModel(): AutoTestModel? {
+            if (this?.externalId == null) {
+                return null;
+            }
+
+            val model = AutoTestModel(
+                id = this.id,
+                externalId = this.externalId!!,
+                links = this.links.toPutModels(),
+                projectId = this.projectId,
+                name = this.name,
+                namespace = this.namespace,
+                classname = this.classname,
+                steps = this.steps.toStepModels(),
+                setup = this.setup.toStepModels(),
+                teardown = this.teardown.toStepModels(),
+                title = this.title,
+                description = this.description,
+                labels = this.labels.toPutModels(),
+                externalKey = this.externalKey,
+                globalId = this.globalId,
+                isDeleted = this.isDeleted,
+                mustBeApproved = this.mustBeApproved,
+                createdDate = this.createdDate,
+                createdById = this.createdById,
+                lastTestResultStatus = if (this.lastTestResultStatus != null)
+                    this.lastTestResultStatus!!.toModel() else null
+            )
+
+            return model;
+        }
 
         private fun TestStatusApiResult.toModel(): TestStatusModel {
             return TestStatusModel(
