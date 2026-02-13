@@ -44,6 +44,7 @@ class TestServiceTests : StringSpec({
         mockkObject(Utils.Companion)
         every { Utils.genExternalID(expectedFullName) } returns "generated-id"
         every { Utils.defaultLabels() } returns mutableListOf()
+        every { Utils.defaultTags() } returns mutableListOf()
         every { Utils.defaultLinks() } returns mutableListOf()
         every { mockTestCase.descriptor.path() } returns TestPath("test-path")
 

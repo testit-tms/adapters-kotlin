@@ -48,6 +48,7 @@ class TestService (
             externalId = Utils.genExternalID(fullName),
             externalKey = externalKey,
             labels = Utils.defaultLabels(),
+            tags = Utils.defaultTags(),
             linkItems = Utils.defaultLinks()
         )
         uuids[testCase.descriptor.path()] = uuid

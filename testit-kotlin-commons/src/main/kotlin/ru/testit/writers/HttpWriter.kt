@@ -33,10 +33,9 @@ class HttpWriter(
                 LOGGER.debug("Write auto test {}", testResultCommon.externalId)
             }
 
-            val autoTestApiResult = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
+            val autotest = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
             val workItemIds = testResultCommon.workItemIds
             var autoTestId: String? = null
-            val autotest = autoTestApiResult.toModel()
 
             if (autotest != null) {
                 if (LOGGER.isDebugEnabled()) {
@@ -124,10 +123,7 @@ class HttpWriter(
     override fun writeClass(container: ClassContainer): Unit = container.children.forEach { testUuid ->
         storage.getTestResult(testUuid)?.let { test ->
             try {
-                val autoTestApiResult = apiClient.getAutoTestByExternalId(test.get().externalId!!)
-                val autoTestModel = autoTestApiResult.toModel()
-
-                if (autoTestModel == null) return@forEach
+                val model = apiClient.getAutoTestByExternalId(test.get().externalId!!)  ?: return
 
                 val beforeClass = Converter.convertFixture(container.beforeClassMethods, null)
                 val beforeEach = Converter.convertFixture(container.beforeEachTest, testUuid)
@@ -139,10 +135,10 @@ class HttpWriter(
 
 
                 val autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(
-                    autoTestModel = autoTestModel,
+                    autoTestModel = model,
                     setup = beforeClass,
                     teardown = afterClass,
-                    isFlaky = autoTestModel.isFlaky
+                    isFlaky = model.isFlaky
                 )
 
                 apiClient.updateAutoTest(autoTestUpdateApiModel)
@@ -170,20 +166,19 @@ class HttpWriter(
                     }
                     try {
                         val testResult = test.get()
-                        val autoTestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!)
-                        val autoTestModel = autoTestApiResult.toModel() ?: return
+                        val autotestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!) ?: return
 
                         val beforeFinish = ArrayList(beforeAll).apply {
-                            if (autoTestModel.setup != null)
-                                addAll(autoTestModel.setup!!)
+                            if (autotestApiResult.setup != null)
+                                addAll(autotestApiResult.setup!!)
                         }
                         val afterClass = Converter.convertFixture(cl.get().afterClassMethods, null)
-                        val afterFinish = autoTestModel.teardown.apply {
+                        val afterFinish = autotestApiResult.teardown.apply {
                             addAll(afterClass)
                             addAll(afterAll)
                         }
-                        val autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(autoTestModel,
-                            beforeFinish, afterFinish, autoTestModel.isFlaky
+                        val autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(autotestApiResult,
+                            beforeFinish, afterFinish, autotestApiResult.isFlaky
                         )
 
                         apiClient.updateAutoTest(autoTestUpdateApiModel)

@@ -9,9 +9,6 @@ import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.*
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 
 class Utils {
@@ -23,6 +20,7 @@ companion object {
 
 
     fun defaultLabels(): MutableList<Label> = mutableListOf()
+    fun defaultTags(): MutableList<String> = mutableListOf()
     fun genExternalID(fullName: String): String = getHash(fullName)
     fun defaultLinks(): MutableList<LinkItem> = mutableListOf()
 

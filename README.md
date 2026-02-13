@@ -41,7 +41,8 @@ Description of metadata:
 * `message` - autotest message
 * `itemStatus` - autotest itemStatus 
 * `description` - autotest description specified in the autotest card
-* `labels` - tags listed in the autotest card
+* `labels` - labels listed in the autotest card
+* `tags` - tags listed in the autotest card
 
 
 All autotest metadata described with `TestItContext` class using `testCase.setContext()`: 
@@ -60,6 +61,7 @@ data class TestItContext (
     var description: String? = null,
     var parameters: MutableMap<String, String>? = null,
     var labels: MutableList<Label>? = null,
+    var tags: MutableList<String>? = null,
 )
 ```
 
