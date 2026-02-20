@@ -13,6 +13,7 @@ data class TestResultCommon(
     var className: String = "",
     var spaceName: String = "",
     var labels: MutableList<Label> = mutableListOf<Label>(),
+    var tags: MutableList<String> = mutableListOf<String>(),
     var linkItems: MutableList<LinkItem> = mutableListOf<LinkItem>(),
     var resultLinks: MutableList<LinkItem> = mutableListOf<LinkItem>(),
     var attachments: MutableList<String> = mutableListOf<String>(),
@@ -51,6 +52,7 @@ data class TestResultCommon(
             .append("    className:").append(Utils.toIndentedString(this.className)).append("\n")
             .append("    spaceName: ").append(Utils.toIndentedString(this.spaceName)).append("\n")
             .append("    labels: ").append(Utils.toIndentedString(this.labels)).append("\n")
+            .append("    tags: ").append(Utils.toIndentedString(this.tags)).append("\n")
             .append("    linkItems: ").append(Utils.toIndentedString(this.linkItems)).append("\n")
             .append("    resultLinks:").append(Utils.toIndentedString(this.resultLinks)).append("\n")
             .append("    attachments:").append(Utils.toIndentedString(this.attachments)).append("\n")

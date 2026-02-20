@@ -96,6 +96,7 @@ fun TestCase.setContext(value: TestItContext) {
         value.description = if (value.description != null) value.description else context.description
         value.parameters = if (value.parameters != null) value.parameters else context.parameters
         value.labels = if (value.labels != null) value.labels else context.labels
+        value.tags = if (value.tags != null) value.tags else context.tags
     }
     writer.context[this.name.toString()] = value
 }

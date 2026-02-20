@@ -29,6 +29,7 @@ class Converter {
                 links = convertPostLinks(result.linkItems),
                 steps = convertStepsToApiModel(result.getSteps()),
                 labels = labelsPostConvert(result.labels),
+                tags = result.tags,
                 shouldCreateWorkItem = result.automaticCreationTestCases,
             )
             return model
@@ -52,6 +53,7 @@ class Converter {
                 links = convertPutLinks(result.linkItems),
                 steps = convertStepsToApiModel(result.getSteps()),
                 labels = labelsPostConvert(result.labels),
+                tags = result.tags,
                 setup = ArrayList(),
                 teardown = ArrayList(),
                 isFlaky = isFlaky
@@ -80,11 +82,11 @@ class Converter {
             return model
         }
 
-        fun convertFixture(fixtures: List<FixtureResult>, parentUuid: String?): MutableList<AutoTestStepModel> {
+        fun convertFixture(fixtures: List<FixtureResult>, parentUuid: String?): MutableList<AutoTestStepApiResult> {
             return fixtures.stream()
                 .filter { filterSteps(parentUuid, it) }
                 .map { fixture ->
-                    val model = AutoTestStepModel(
+                    val model = AutoTestStepApiResult(
                         fixture.name!!,
                         fixture.description,
                         convertSteps(fixture.getSteps())
@@ -100,35 +102,35 @@ class Converter {
             return parentUuid != null && Objects.equals(f.parent, parentUuid)
         }
 
-        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestModel): AutoTestUpdateApiModel {
+        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult): AutoTestUpdateApiModel {
             return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, null, null, null)
         }
 
 
-        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestModel,
-                                                  setup:  List<AutoTestStepModel>?,
-                                                  teardown:  List<AutoTestStepModel>?,
+        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult,
+                                                  setup:  List<AutoTestStepApiResult>?,
+                                                  teardown:  List<AutoTestStepApiResult>?,
                                                   isFlaky: Boolean?): AutoTestUpdateApiModel {
             return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, isFlaky, setup, teardown)
         }
 
 
-        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestModel,
+        fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult,
                                                   links: List<LinkUpdateApiModel>?,
                                                   isFlaky: Boolean?): AutoTestUpdateApiModel {
             return autoTestModelToAutoTestUpdateApiModel(autoTestModel, links, isFlaky, null, null)
         }
 
         fun autoTestModelToAutoTestUpdateApiModel(
-            autoTestModel: AutoTestModel,
+            autoTestModel: AutoTestApiResult,
             links: List<LinkUpdateApiModel>?,
             isFlaky: Boolean?,
-            setup: List<AutoTestStepModel>?,
-            teardown: List<AutoTestStepModel>?,
+            setup: List<AutoTestStepApiResult>?,
+            teardown: List<AutoTestStepApiResult>?,
         ): AutoTestUpdateApiModel {
             val model = AutoTestUpdateApiModel(
                 id = autoTestModel.id,
-                externalId = autoTestModel.externalId,
+                externalId = autoTestModel.externalId!!,
                 externalKey = autoTestModel.externalKey,
                 links = links ?: autoTestModel.links.toUpdateApiModels(),
                 projectId = autoTestModel.projectId,
@@ -141,6 +143,7 @@ class Converter {
                 title = autoTestModel.title,
                 description = autoTestModel.description,
                 labels = labelsConvert(autoTestModel.labels!!),
+                tags = autoTestModel.tags,
                 isFlaky = isFlaky,
 
                 )
@@ -216,9 +219,9 @@ class Converter {
                 model
             }
 
-        fun convertSteps(steps: List<StepResult>): List<AutoTestStepModel> =
+        fun convertSteps(steps: List<StepResult>): List<AutoTestStepApiResult> =
             steps.map {
-                val model = AutoTestStepModel(
+                val model = AutoTestStepApiResult(
                     title = it.name!!,
                     description = it.description,
                     steps = convertSteps(it.getSteps())
@@ -273,7 +276,7 @@ class Converter {
                 .collect(Collectors.toList())
         }
 
-        private fun labelsConvert(labels: List<LabelShortModel>): List<LabelApiModel> =
+        private fun labelsConvert(labels: List<LabelApiResult>): List<LabelApiModel> =
             labels.map { LabelApiModel(name = it.name) }
 
         private fun labelsPostConvert(labels: List<Label>): List<LabelApiModel> =
@@ -353,13 +356,13 @@ class Converter {
             }.collect(Collectors.toList())
         }
 
-        @JvmName("autoTestStepModelsToStepApiModels")
-        private fun List<AutoTestStepModel>?.toApiModels(): List<AutoTestStepApiModel>? {
+        @JvmName("autoTestStepApiResultToStepApiModels")
+        private fun List<AutoTestStepApiResult>?.toApiModels(): List<AutoTestStepApiModel>? {
             if (this == null) {
                 return ArrayList()
             }
 
-            return this.stream().map { step: AutoTestStepModel ->
+            return this.stream().map { step: AutoTestStepApiResult ->
                 val model = AutoTestStepApiModel(
                     title = step.title,
                     description = step.description,
@@ -406,13 +409,13 @@ class Converter {
             }.collect(Collectors.toList())
         }
 
-        @JvmName("linkPutModelToUpdateApiModels")
-        private fun List<LinkPutModel>?.toUpdateApiModels(): List<LinkUpdateApiModel> {
+        @JvmName("linkApiResultToUpdateApiModels")
+        private fun List<LinkApiResult>?.toUpdateApiModels(): List<LinkUpdateApiModel> {
             if (this == null) {
                 return ArrayList()
             }
 
-            return this.stream().map { link: LinkPutModel ->
+            return this.stream().map { link: LinkApiResult ->
                 val model = LinkUpdateApiModel(
                     url = link.url,
                     hasInfo = false,

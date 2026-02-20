@@ -51,12 +51,10 @@ class Helper {
         fun generateTestResult(): TestResultCommon {
             val startDate = Date()
             val stopDate = Date(startDate.time + 1000)
-
             val links = mutableListOf(generateLinkItem())
-
             val steps = mutableListOf(generateStepResult())
-
             val labels_ = mutableListOf(Label(LABEL_NAME))
+            val tags_ = mutableListOf(LABEL_NAME)
 
             return TestResultCommon().setSteps(steps)
                 .apply {
@@ -73,6 +71,7 @@ class Helper {
                 itemStatus = ITEM_STATUS
                 linkItems = links
                 labels = labels_
+                tags = tags_
             }
 
         }
