@@ -10,6 +10,8 @@ import ru.testit.models.TestResultCommon
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
+import java.util.Locale
+import java.util.Locale.getDefault
 import java.util.stream.Collectors
 
 class Converter {
@@ -157,6 +159,22 @@ class Converter {
                 result, configurationId, null, null)
         }
 
+        // PASSED("Passed"),
+        // FAILED("Failed"),
+        // SKIPPED("Skipped"),
+        // INPROGRESS("InProgress"),
+        // BLOCKED("Blocked");
+        fun mapStatusType(status: String): TestStatusType {
+            when (status) {
+                "Passed" -> return TestStatusType.Succeeded
+                "Failed" -> return TestStatusType.Failed
+                "InProgress" -> return TestStatusType.InProgress
+                "Skipped" -> return TestStatusType.Incomplete
+                "Blocked" -> return TestStatusType.Incomplete
+            }
+            return TestStatusType.Incomplete
+        }
+
         fun testResultToAutoTestResultsForTestRunModel(result: TestResultCommon,
                                                        configurationId: UUID?,
                                                        setupResults: List<AttachmentPutModelAutoTestStepResultsModel>?,
@@ -166,7 +184,7 @@ class Converter {
             val model = AutoTestResultsForTestRunModel(
                 configurationId = configurationId ?: UUID.fromString(result.uuid),
                 autoTestExternalId = result.externalId!!,
-                statusCode = result.itemStatus?.value!!,
+                statusType = mapStatusType(result.itemStatus!!.value),
                 links = convertPostLinksToPostModel(result.resultLinks),
                 startedOn = dateToOffsetDateTime(result.start!!),
                 completedOn = dateToOffsetDateTime(result.stop!!),
