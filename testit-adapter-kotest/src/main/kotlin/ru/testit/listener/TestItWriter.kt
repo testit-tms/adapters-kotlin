@@ -89,6 +89,7 @@ class TestItWriter () {
     fun onBeforeAll(spec: Spec) {
         var rootTestName =  spec.rootTests()[0].name.testName
         debug("Before all: {}",rootTestName)
+        adapterManager.onRunningStarted()
         runContainers(rootTestName)
     }
 
@@ -99,6 +100,7 @@ class TestItWriter () {
         var rootTestName =  spec.rootTests()[0].name.testName
         debug("After all: {}", rootTestName)
         stopContainers(rootTestName)
+        adapterManager.onBlockCompleted()
     }
 
     /**
@@ -170,6 +172,7 @@ class TestItWriter () {
         if (!isTestOrContainersEnabled(testCase)) {
             return
         }
+        adapterManager.onRunningStarted()
         var isContainer = testCase.type.name == "Container"
         var isStep = testCase.isStep();
         if (isContainer) {

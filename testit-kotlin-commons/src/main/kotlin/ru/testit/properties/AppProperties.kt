@@ -19,6 +19,8 @@ val AUTOMATIC_CREATION_TEST_CASES = "automaticCreationTestCases"
 val AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES = "automaticUpdationLinksToTestCases"
 val CERT_VALIDATION = "certValidation"
 val TMS_INTEGRATION = "testIt"
+val SYNC_STORAGE_PORT = "syncStoragePort"
+val IMPORT_REALTIME = "importRealtime"
 
 val PROPERTIES_FILE = "testit.properties"
 
@@ -36,7 +38,9 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         AUTOMATIC_CREATION_TEST_CASES to "TMS_AUTOMATIC_CREATION_TEST_CASES",
         AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES to "TMS_AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES",
         CERT_VALIDATION to "TMS_CERT_VALIDATION",
-        TMS_INTEGRATION to "TMS_TEST_IT"
+        TMS_INTEGRATION to "TMS_TEST_IT",
+        SYNC_STORAGE_PORT to "TMS_SYNC_STORAGE_PORT",
+        IMPORT_REALTIME to "TMS_IMPORT_REALTIME"
     ),
     "cli" to mapOf(
         URL to "tmsUrl",
@@ -49,7 +53,9 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         AUTOMATIC_CREATION_TEST_CASES to "tmsAutomaticCreationTestCases",
         AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES to "tmsAutomaticUpdationLinksToTestCases",
         CERT_VALIDATION to "tmsCertValidation",
-        TMS_INTEGRATION to "tmsTestIt"
+        TMS_INTEGRATION to "tmsTestIt",
+        SYNC_STORAGE_PORT to "tmsSyncStoragePort",
+        IMPORT_REALTIME to "tmsImportRealtime"
     )
 )
 
@@ -170,6 +176,19 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         val tmsIntegration = properties.getProperty(varNames[TMS_INTEGRATION])
         if (tmsIntegration == "false" || tmsIntegration == "true") {
             result[TMS_INTEGRATION] = tmsIntegration
+        }
+
+        val syncStoragePort = properties.getProperty(varNames[SYNC_STORAGE_PORT])
+        if (!syncStoragePort.isNullOrBlank()) {
+            val portInt = syncStoragePort.toIntOrNull()
+            if (portInt != null && portInt in 1..65535) {
+                result[SYNC_STORAGE_PORT] = syncStoragePort
+            }
+        }
+
+        val importRealtime = properties.getProperty(varNames[IMPORT_REALTIME])
+        if (importRealtime == "false" || importRealtime == "true") {
+            result[IMPORT_REALTIME] = importRealtime
         }
 
         return result
