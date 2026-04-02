@@ -165,12 +165,13 @@ class Converter {
         // INPROGRESS("InProgress"),
         // BLOCKED("Blocked");
         fun mapStatusType(status: String): TestStatusType {
+            val status = status.uppercase()
             when (status) {
-                "Passed" -> return TestStatusType.Succeeded
-                "Failed" -> return TestStatusType.Failed
-                "InProgress" -> return TestStatusType.InProgress
-                "Skipped" -> return TestStatusType.Incomplete
-                "Blocked" -> return TestStatusType.Incomplete
+                "PASSED" -> return TestStatusType.Succeeded
+                "FAILED" -> return TestStatusType.Failed
+                "INPROGRESS" -> return TestStatusType.InProgress
+                "SKIPPED" -> return TestStatusType.Incomplete
+                "BLOCKED" -> return TestStatusType.Incomplete
             }
             return TestStatusType.Incomplete
         }

@@ -4,6 +4,7 @@ package ru.testit.services
 import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
+import ru.testit.clients.Converter.Companion.mapStatusType
 import ru.testit.clients.TmsApiClient
 import ru.testit.kotlin.client.models.TestRunState
 import ru.testit.listener.AdapterListener
@@ -67,9 +68,16 @@ class AdapterManager(
             val port = adapterConfig.syncStoragePort
             val url = clientConfiguration.url
             val token = clientConfiguration.privateToken
+            var testRunId = clientConfiguration.testRunId
+
+            if (testRunId == null || "null" == testRunId) {
+                val response = this.client.createTestRun()
+                this.clientConfiguration.testRunId = response.id.toString()
+                testRunId = response.id.toString()
+            }
 
             val runner = SyncStorageRunner(
-                testRunId = clientConfiguration.testRunId,
+                testRunId = testRunId,
                 port = port,
                 baseUrl = url,
                 privateToken = token
@@ -648,7 +656,9 @@ class AdapterManager(
 
         val model = TestResultCutApiModel(
             autoTestExternalId = testResult.externalId ?: return false,
-            statusCode = testResult.itemStatus?.name ?: "Unknown"
+            statusCode = testResult.itemStatus?.name ?: "",
+            statusType = mapStatusType(testResult.itemStatus?.name ?: "").toString(),
+            projectId = clientConfiguration.projectId,
         )
 
         val success = runner.sendInProgressTestResult(model)
