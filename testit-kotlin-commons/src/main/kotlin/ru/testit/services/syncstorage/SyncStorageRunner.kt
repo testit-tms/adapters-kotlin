@@ -6,6 +6,14 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.TimeUnit
+import okhttp3.OkHttpClient
+import ru.testit.syncstorage.invoker.apis.HealthApi
+import ru.testit.syncstorage.invoker.apis.TestResultsApi
+import ru.testit.syncstorage.invoker.apis.WorkersApi
+import ru.testit.syncstorage.invoker.models.RegisterRequest
+import ru.testit.syncstorage.invoker.models.SetWorkerStatusRequest
+import ru.testit.syncstorage.invoker.models.TestResultCutApiModel
 
 /**
  * Manages Sync Storage lifecycle: download binary, start process,
@@ -21,7 +29,15 @@ class SyncStorageRunner(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private var client: SyncStorageClient = SyncStorageClient("http://localhost:$port")
+    private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .build()
+
+    private val healthApi: HealthApi = HealthApi("http://localhost:$port", okHttpClient)
+    private val workersApi: WorkersApi = WorkersApi("http://localhost:$port", okHttpClient)
+    private val testResultsApi: TestResultsApi = TestResultsApi("http://localhost:$port", okHttpClient)
     private var process: Process? = null
     private var workerPid: String = "worker-${Thread.currentThread().id}-${System.currentTimeMillis()}"
 
@@ -45,7 +61,7 @@ class SyncStorageRunner(
             }
 
             // Check if externally started
-            if (client.isHealthy()) {
+            if (isHealthy()) {
                 logger.info("SyncStorage already running on port $port. Connecting to existing instance.")
                 isRunning = true
                 isExternal = true
@@ -100,8 +116,8 @@ class SyncStorageRunner(
     private fun registerWorker() {
         try {
             val request = RegisterRequest(pid = workerPid, testRunId = testRunId)
-            val response = client.registerWorker(request)
-            isMaster = response.isMaster
+            val response = workersApi.registerPost(request)
+            isMaster = response.isMaster ?: false
 
             if (isMaster) {
                 logger.info("Registered as MASTER worker, pid=$workerPid")
@@ -124,7 +140,7 @@ class SyncStorageRunner(
                 status = status,
                 testRunId = testRunId
             )
-            client.setWorkerStatus(request)
+            workersApi.setWorkerStatusPost(request)
             logger.debug("Set worker status to $status")
         } catch (e: Exception) {
             logger.warn("Error setting worker status: ${e.message}")
@@ -144,11 +160,14 @@ class SyncStorageRunner(
             return false
         }
 
-        val success = client.sendInProgressTestResult(testRunId, model)
-        if (success) {
+        return try {
+            testResultsApi.inProgressTestResultPost(testRunId, model)
             isAlreadyInProgress = true
+            true
+        } catch (e: Exception) {
+            logger.warn("Error sending in-progress test result: ${e.message}")
+            false
         }
-        return success
     }
 
     /**
@@ -170,7 +189,8 @@ class SyncStorageRunner(
                 logger.warn("Error stopping SyncStorage: ${e.message}")
             }
         }
-        client.close()
+        okHttpClient.dispatcher.executorService.shutdown()
+        okHttpClient.connectionPool.evictAll()
         isRunning = false
     }
 
@@ -188,10 +208,19 @@ class SyncStorageRunner(
     private fun waitForStartup(timeoutSeconds: Int): Boolean {
         val deadline = System.currentTimeMillis() + timeoutSeconds * 1000L
         while (System.currentTimeMillis() < deadline) {
-            if (client.isHealthy()) return true
+            if (isHealthy()) return true
             Thread.sleep(1000)
         }
         return false
+    }
+
+    private fun isHealthy(): Boolean {
+        return try {
+            healthApi.healthGet()
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun prepareExecutable(): String {
@@ -240,7 +269,7 @@ class SyncStorageRunner(
     }
 
     companion object {
-        const val SYNC_STORAGE_VERSION = "v0.1.18"
+        const val SYNC_STORAGE_VERSION = "v0.1.21"
         const val SYNC_STORAGE_REPO_URL = "https://github.com/testit-tms/sync-storage-public/releases/download/"
         const val DEFAULT_PORT = "49152"
         const val STARTUP_TIMEOUT_SECONDS = 30

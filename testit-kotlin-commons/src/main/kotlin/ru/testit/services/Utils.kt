@@ -121,7 +121,7 @@ companion object {
     private fun convertToHex(messageDigest: ByteArray): String {
         val bigint = BigInteger(1, messageDigest)
         var hexText = bigint.toString(16).padStart(32, '0')
-        return hexText.toUpperCase()
+        return hexText.uppercase()
     }
 
 }

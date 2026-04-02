@@ -238,6 +238,9 @@ class TestItWriter () {
         ) { container: ClassContainer -> container.children.add(uuid) }
     }
 
+    fun startRun() {
+        adapterManager.startTests()
+    }
 
     /**
      * Create new test run.

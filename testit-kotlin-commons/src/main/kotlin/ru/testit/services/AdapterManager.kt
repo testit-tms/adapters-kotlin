@@ -18,7 +18,7 @@ import ru.testit.listener.ServiceLoaderListener
 import ru.testit.models.*
 import ru.testit.properties.AdapterMode
 import ru.testit.services.syncstorage.SyncStorageRunner
-import ru.testit.services.syncstorage.TestResultCutApiModel
+import ru.testit.syncstorage.invoker.models.TestResultCutApiModel
 
 
 class AdapterManager(private var clientConfiguration: ClientConfiguration,

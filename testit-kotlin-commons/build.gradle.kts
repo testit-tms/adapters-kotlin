@@ -1,5 +1,5 @@
 group = "ru.testit"
-version = "0.9.3"
+version = "1.0.0"
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -18,6 +18,7 @@ val apiVersion = "0.9.3"
 dependencies {
     implementation("ru.testit:testit-api-client-kotlin:$apiVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("ru.testit:syncstorage-invoker:0.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")

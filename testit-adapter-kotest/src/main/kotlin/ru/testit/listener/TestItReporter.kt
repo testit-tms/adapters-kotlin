@@ -62,6 +62,7 @@ class TestItReporter(
     }
 
     override suspend fun beforeProject() {
+//        writer.startRun()
     }
 
     override suspend fun afterProject() {
