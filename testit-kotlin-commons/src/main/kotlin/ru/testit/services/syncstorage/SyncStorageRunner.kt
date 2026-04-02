@@ -8,12 +8,12 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
-import ru.testit.syncstorage.invoker.apis.HealthApi
-import ru.testit.syncstorage.invoker.apis.TestResultsApi
-import ru.testit.syncstorage.invoker.apis.WorkersApi
-import ru.testit.syncstorage.invoker.models.RegisterRequest
-import ru.testit.syncstorage.invoker.models.SetWorkerStatusRequest
-import ru.testit.syncstorage.invoker.models.TestResultCutApiModel
+import ru.testit.services.syncstorage.apis.HealthApi
+import ru.testit.services.syncstorage.apis.TestResultsApi
+import ru.testit.services.syncstorage.apis.WorkersApi
+import ru.testit.services.syncstorage.models.RegisterRequest
+import ru.testit.services.syncstorage.models.SetWorkerStatusRequest
+import ru.testit.services.syncstorage.models.TestResultCutApiModel
 
 /**
  * Manages Sync Storage lifecycle: download binary, start process,
@@ -35,9 +35,12 @@ class SyncStorageRunner(
         .writeTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    private val healthApi: HealthApi = HealthApi("http://localhost:$port", okHttpClient)
-    private val workersApi: WorkersApi = WorkersApi("http://localhost:$port", okHttpClient)
-    private val testResultsApi: TestResultsApi = TestResultsApi("http://localhost:$port", okHttpClient)
+    private val healthApi: HealthApi =
+        HealthApi("http://localhost:$port", okHttpClient)
+    private val workersApi: WorkersApi =
+        WorkersApi("http://localhost:$port", okHttpClient)
+    private val testResultsApi: TestResultsApi =
+        TestResultsApi("http://localhost:$port", okHttpClient)
     private var process: Process? = null
     private var workerPid: String = "worker-${Thread.currentThread().id}-${System.currentTimeMillis()}"
 
@@ -269,7 +272,7 @@ class SyncStorageRunner(
     }
 
     companion object {
-        const val SYNC_STORAGE_VERSION = "v0.1.21"
+        const val SYNC_STORAGE_VERSION = "v0.1.27"
         const val SYNC_STORAGE_REPO_URL = "https://github.com/testit-tms/sync-storage-public/releases/download/"
         const val DEFAULT_PORT = "49152"
         const val STARTUP_TIMEOUT_SECONDS = 30

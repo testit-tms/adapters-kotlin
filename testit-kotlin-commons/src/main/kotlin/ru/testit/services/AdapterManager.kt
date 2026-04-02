@@ -7,23 +7,24 @@ import ru.testit.clients.ClientConfiguration
 import ru.testit.clients.TmsApiClient
 import ru.testit.kotlin.client.models.TestRunState
 import ru.testit.listener.AdapterListener
+import ru.testit.listener.ListenerManager
+import ru.testit.listener.ServiceLoaderListener
+import ru.testit.models.*
 import ru.testit.properties.AdapterConfig
+import ru.testit.properties.AdapterMode
 import ru.testit.services.Adapter.getResultStorage
+import ru.testit.services.syncstorage.SyncStorageRunner
+import ru.testit.services.syncstorage.models.TestResultCutApiModel
 import ru.testit.writers.HttpWriter
 import ru.testit.writers.Writer
 import java.util.*
 import java.util.function.Consumer
-import ru.testit.listener.ListenerManager;
-import ru.testit.listener.ServiceLoaderListener
-import ru.testit.models.*
-import ru.testit.properties.AdapterMode
-import ru.testit.services.syncstorage.SyncStorageRunner
-import ru.testit.syncstorage.invoker.models.TestResultCutApiModel
 
 
-class AdapterManager(private var clientConfiguration: ClientConfiguration,
-                private var adapterConfig: AdapterConfig,
-              private var client: ApiClient,
+class AdapterManager(
+    private var clientConfiguration: ClientConfiguration,
+    private var adapterConfig: AdapterConfig,
+    private var client: ApiClient,
 ) {
 
     private var writer: Writer? = null
