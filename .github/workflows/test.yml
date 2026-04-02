@@ -98,7 +98,7 @@ jobs:
           curl -v http://127.0.0.1:49152/health || true
 
 
-          ./gradlew test --no-daemon || exit 0
+          ./gradlew test --no-daemon || true
 
           sleep 1
           
