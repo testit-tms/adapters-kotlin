@@ -2,6 +2,7 @@ package ru.testit.utils
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
 
 class HtmlEscapeUtilsTest {
 
@@ -70,5 +71,33 @@ class HtmlEscapeUtilsTest {
         assertEquals("Test &lt;script&gt;alert('xss')&lt;/script&gt;", result!!.title)
         assertEquals("Description with &lt;div&gt;HTML&lt;/div&gt;", result.description)
         assertEquals(123, result.id) // Should remain unchanged
+    }
+
+    @Test
+    fun `escapeHtmlInObject should not escape externalId and autoTestExternalId`() {
+        data class Payload(
+            var externalId: String,
+            var autoTestExternalId: String,
+            var description: String,
+            var message: String,
+            val id: UUID,
+        )
+
+        val externalId = "<test>"
+        val obj = Payload(
+            externalId = externalId,
+            autoTestExternalId = externalId,
+            description = "<div>desc</div>",
+            message = "<span>msg</span>",
+            id = UUID.randomUUID()
+        )
+
+        val escaped = HtmlEscapeUtils.escapeHtmlInObject(obj)!!
+
+        assertEquals(externalId, escaped.externalId)
+        assertEquals(externalId, escaped.autoTestExternalId)
+        assertEquals("&lt;div&gt;desc&lt;/div&gt;", escaped.description)
+        assertEquals("&lt;span&gt;msg&lt;/span&gt;", escaped.message)
+        assertEquals(obj.id, escaped.id)
     }
 } 

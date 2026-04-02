@@ -12,6 +12,7 @@ import kotlin.reflect.jvm.isAccessible
  */
 object HtmlEscapeUtils {
     private const val NO_ESCAPE_HTML_ENV_VAR = "NO_ESCAPE_HTML"
+    private val excludedPropertyNames = setOf("externalId", "autoTestExternalId")
     
     // Regex pattern to detect HTML tags that are not already escaped
     private val htmlTagPattern = Regex("<\\S.*?(?:>|/>)")
@@ -108,6 +109,9 @@ object HtmlEscapeUtils {
 
         for (property in properties) {
             try {
+                if (property.name in excludedPropertyNames) {
+                    continue
+                }
                 // Only process mutable properties
                 if (property !is KMutableProperty1<*, *>) {
                     continue
