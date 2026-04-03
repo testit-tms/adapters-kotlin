@@ -96,7 +96,7 @@ class SyncStorageRunner(
             }, "sync-storage-output-reader").apply { isDaemon = true }.start()
 
             // Wait for startup
-            if (!waitForStartup(STARTUP_TIMEOUT_SECONDS)) {
+            if (!waitForStartup()) {
                 throw RuntimeException("SyncStorage failed to start within ${STARTUP_TIMEOUT_SECONDS}s")
             }
 
@@ -206,8 +206,8 @@ class SyncStorageRunner(
         return cmd
     }
 
-    private fun waitForStartup(timeoutSeconds: Int): Boolean {
-        val deadline = System.currentTimeMillis() + timeoutSeconds * 1000L
+    private fun waitForStartup(): Boolean {
+        val deadline = System.currentTimeMillis() + STARTUP_TIMEOUT_SECONDS * 1000L
         while (System.currentTimeMillis() < deadline) {
             if (isHealthy()) return true
             Thread.sleep(1000)
