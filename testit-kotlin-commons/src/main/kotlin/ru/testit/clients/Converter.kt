@@ -135,7 +135,7 @@ class Converter {
             val model = AutoTestUpdateApiModel(
                 id = autoTestModel.id,
                 externalId = autoTestModel.externalId!!,
-                externalKey = externalKey,
+                externalKey = externalKey ?: autoTestModel.externalKey,
                 links = links ?: autoTestModel.links.toUpdateApiModels(),
                 projectId = autoTestModel.projectId,
                 name = autoTestModel.name,
@@ -167,7 +167,6 @@ class Converter {
         // INPROGRESS("InProgress"),
         // BLOCKED("Blocked");
         fun mapStatusType(status: String): TestStatusType {
-            val status = status.uppercase()
             when (status) {
                 "Passed" -> return TestStatusType.Succeeded
                 "Failed" -> return TestStatusType.Failed
