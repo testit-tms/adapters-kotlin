@@ -197,8 +197,6 @@ class SyncStorageRunner(
         isRunning = false
     }
 
-    // --- Private helpers ---
-
     private fun buildCommand(executablePath: String): List<String> {
         val cmd = mutableListOf(executablePath)
         testRunId.let { cmd.addAll(listOf("--testRunId", it)) }

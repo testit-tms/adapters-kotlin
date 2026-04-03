@@ -30,7 +30,7 @@ class AdapterManager(
 
     private var writer: Writer? = null
     private var threadContext = ThreadContext()
-    private var storage = Adapter.getResultStorage()
+    private var storage = getResultStorage()
     private val LOGGER = LoggerFactory.getLogger(javaClass)
     private var listenerManager: ListenerManager = getDefaultListenerManager()
     private var syncStorageRunner: SyncStorageRunner? = null
@@ -608,8 +608,6 @@ class AdapterManager(
 
     fun getCurrentTestCaseOrStep(): Optional<String> = threadContext.getCurrent()
 
-    // --- Sync Storage lifecycle methods ---
-
     /**
      * Notify Sync Storage that test execution is in progress.
      * Should be called before test execution begins.
@@ -667,8 +665,6 @@ class AdapterManager(
         runner.isAlreadyInProgress = true
 
         try {
-            // Write with InProgress status
-            val originalStatus = testResult.itemStatus
             testResult.itemStatus = ItemStatus.INPROGRESS
             writer?.writeTest(testResult)
             return true
