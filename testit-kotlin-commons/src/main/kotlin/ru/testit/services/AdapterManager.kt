@@ -654,8 +654,8 @@ class AdapterManager(
 
         val model = TestResultCutApiModel(
             autoTestExternalId = testResult.externalId ?: return false,
-            statusCode = testResult.itemStatus?.name ?: "",
-            statusType = mapStatusType(testResult.itemStatus?.name ?: "").toString(),
+            statusCode = testResult.itemStatus?.value ?: "",
+            statusType = mapStatusType(testResult.itemStatus?.value ?: "").toString(),
             projectId = clientConfiguration.projectId,
         )
 
