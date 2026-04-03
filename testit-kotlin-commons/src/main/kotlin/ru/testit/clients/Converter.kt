@@ -105,7 +105,7 @@ class Converter {
         }
 
         fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, null, null, null)
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, null, null, null, null)
         }
 
 
@@ -113,14 +113,15 @@ class Converter {
                                                   setup:  List<AutoTestStepApiResult>?,
                                                   teardown:  List<AutoTestStepApiResult>?,
                                                   isFlaky: Boolean?): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, isFlaky, setup, teardown)
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, isFlaky, setup, teardown, null)
         }
 
 
         fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult,
                                                   links: List<LinkUpdateApiModel>?,
-                                                  isFlaky: Boolean?): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, links, isFlaky, null, null)
+                                                  isFlaky: Boolean?,
+                                                  externalKey: String?): AutoTestUpdateApiModel {
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, links, isFlaky, null, null, externalKey)
         }
 
         fun autoTestModelToAutoTestUpdateApiModel(
@@ -129,11 +130,12 @@ class Converter {
             isFlaky: Boolean?,
             setup: List<AutoTestStepApiResult>?,
             teardown: List<AutoTestStepApiResult>?,
+            externalKey: String?,
         ): AutoTestUpdateApiModel {
             val model = AutoTestUpdateApiModel(
                 id = autoTestModel.id,
                 externalId = autoTestModel.externalId!!,
-                externalKey = autoTestModel.externalKey,
+                externalKey = externalKey ?: autoTestModel.externalKey,
                 links = links ?: autoTestModel.links.toUpdateApiModels(),
                 projectId = autoTestModel.projectId,
                 name = autoTestModel.name,

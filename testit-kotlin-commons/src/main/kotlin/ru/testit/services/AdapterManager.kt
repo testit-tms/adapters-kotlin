@@ -4,31 +4,36 @@ package ru.testit.services
 import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
+import ru.testit.clients.Converter.Companion.mapStatusType
 import ru.testit.clients.TmsApiClient
 import ru.testit.kotlin.client.models.TestRunState
 import ru.testit.listener.AdapterListener
+import ru.testit.listener.ListenerManager
+import ru.testit.listener.ServiceLoaderListener
+import ru.testit.models.*
 import ru.testit.properties.AdapterConfig
+import ru.testit.properties.AdapterMode
 import ru.testit.services.Adapter.getResultStorage
+import ru.testit.services.syncstorage.SyncStorageRunner
+import ru.testit.services.syncstorage.models.TestResultCutApiModel
 import ru.testit.writers.HttpWriter
 import ru.testit.writers.Writer
 import java.util.*
 import java.util.function.Consumer
-import ru.testit.listener.ListenerManager;
-import ru.testit.listener.ServiceLoaderListener
-import ru.testit.models.*
-import ru.testit.properties.AdapterMode
 
 
-class AdapterManager(private var clientConfiguration: ClientConfiguration,
-                private var adapterConfig: AdapterConfig,
-              private var client: ApiClient,
+class AdapterManager(
+    private var clientConfiguration: ClientConfiguration,
+    private var adapterConfig: AdapterConfig,
+    private var client: ApiClient,
 ) {
 
     private var writer: Writer? = null
     private var threadContext = ThreadContext()
-    private var storage = Adapter.getResultStorage()
+    private var storage = getResultStorage()
     private val LOGGER = LoggerFactory.getLogger(javaClass)
     private var listenerManager: ListenerManager = getDefaultListenerManager()
+    private var syncStorageRunner: SyncStorageRunner? = null
 
 
     constructor(clientConfiguration: ClientConfiguration, adapterConfig: AdapterConfig)
@@ -49,7 +54,46 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
         this.threadContext = ThreadContext()
         this.client = TmsApiClient(this.clientConfiguration)
         this.writer = HttpWriter(this.clientConfiguration, this.client, this.storage)
-        this.listenerManager = listenerManager;
+        this.listenerManager = listenerManager
+
+        // Initialize Sync Storage
+        this.syncStorageRunner = initializeSyncStorage()
+    }
+
+    /**
+     * Initialize Sync Storage runner if possible.
+     */
+    private fun initializeSyncStorage(): SyncStorageRunner? {
+        return try {
+            val port = adapterConfig.syncStoragePort
+            val url = clientConfiguration.url
+            val token = clientConfiguration.privateToken
+            var testRunId = clientConfiguration.testRunId
+
+            if (testRunId == null || "null" == testRunId) {
+                val response = this.client.createTestRun()
+                this.clientConfiguration.testRunId = response.id.toString()
+                testRunId = response.id.toString()
+            }
+
+            val runner = SyncStorageRunner(
+                testRunId = testRunId,
+                port = port,
+                baseUrl = url,
+                privateToken = token
+            )
+
+            if (runner.start()) {
+                LOGGER.info("Sync Storage started successfully")
+                runner
+            } else {
+                LOGGER.warn("Failed to start Sync Storage, continuing without it")
+                null
+            }
+        } catch (e: Exception) {
+            LOGGER.warn("Failed to initialize Sync Storage: ${e.message}")
+            null
+        }
     }
 
     /**
@@ -77,6 +121,7 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
                 val response = this.client.createTestRun()
                 LOGGER.debug("set testRunId to: " + response.id.toString())
                 this.clientConfiguration.testRunId = response.id.toString()
+                syncStorageRunner?.updateTestRunId(response.id.toString())
             } catch (e: Exception) {
                 LOGGER.error("Can not start the launch: ${e.message}")
             }
@@ -258,6 +303,11 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Stop test case {}", testResult)
+        }
+
+        // Try sync storage in-progress flow first (master worker only)
+        if (trySyncStorageInProgress(testResult)) {
+            return
         }
 
         writer?.writeTest(testResult)
@@ -557,6 +607,74 @@ class AdapterManager(private var clientConfiguration: ClientConfiguration,
     }
 
     fun getCurrentTestCaseOrStep(): Optional<String> = threadContext.getCurrent()
+
+    /**
+     * Notify Sync Storage that test execution is in progress.
+     * Should be called before test execution begins.
+     */
+    fun onRunningStarted() {
+        setWorkerStatus("in_progress")
+    }
+
+    /**
+     * Notify Sync Storage that a block of tests has completed.
+     * Should be called after all tests finish.
+     */
+    fun onBlockCompleted() {
+        setWorkerStatus("completed")
+    }
+
+    private fun setWorkerStatus(status: String) {
+        val runner = syncStorageRunner ?: return
+        if (!runner.isRunning) return
+
+        try {
+            runner.setWorkerStatus(status)
+            LOGGER.debug("Set worker status to $status")
+        } catch (e: Exception) {
+            LOGGER.warn("Error setting worker status to $status: ${e.message}")
+        }
+    }
+
+    /**
+     * Check if sync storage is active and this worker is master with no in-progress test.
+     */
+    private fun isSyncStorageMasterReady(): Boolean {
+        val runner = syncStorageRunner ?: return false
+        return runner.isRunning && runner.isMaster && !runner.isAlreadyInProgress
+    }
+
+    /**
+     * Attempt to send test result to Sync Storage (master-only flow).
+     * Returns true if handled by sync storage, false otherwise.
+     */
+    private fun trySyncStorageInProgress(testResult: TestResultCommon): Boolean {
+        val runner = syncStorageRunner ?: return false
+        if (!isSyncStorageMasterReady()) return false
+
+        val model = TestResultCutApiModel(
+            autoTestExternalId = testResult.externalId ?: return false,
+            statusCode = testResult.itemStatus?.value ?: "",
+            statusType = mapStatusType(testResult.itemStatus?.value ?: "").toString(),
+            projectId = clientConfiguration.projectId,
+        )
+
+        val success = runner.sendInProgressTestResult(model)
+        if (!success) return false
+
+        runner.isAlreadyInProgress = true
+
+        try {
+            testResult.itemStatus = ItemStatus.INPROGRESS
+            writer?.writeTest(testResult)
+            return true
+        } catch (e: Exception) {
+            LOGGER.warn("Error in sync storage in-progress handling, falling back: ${e.message}")
+            runner.isAlreadyInProgress = false
+            return false
+        }
+    }
+
     private companion object {
         @JvmStatic
         private val getDefaultListenerManager: () -> ListenerManager = {

@@ -25,6 +25,7 @@ env:
   TMS_URL: ${{ secrets.TESTIT_URL }}
   TMS_CONFIG_FILE: ${{ github.workspace }}/tms.config.json
   TMS_OVERWRITE_EXPECTED: false
+  TMS_IMPORT_REALTIME: true
 jobs:
   test:
     name: ${{ matrix.project_name }}
@@ -80,9 +81,31 @@ jobs:
           echo "TMS_TEST_RUN_ID=$(<${{ env.TEMP_FILE }})" >> $GITHUB_ENV
       - name: Test
         run: |
+          export SYNC_STORAGE_VERSION=$(grep -o 'SYNC_STORAGE_VERSION = "[^"]*"' testit-kotlin-commons/src/main/kotlin/ru/testit/services/syncstorage/SyncStorageRunner.kt | cut -d'"' -f2)
+        
           cd kotlin-examples/kotest-adapter
           chmod +x ./gradlew
-          ./gradlew test --no-daemon || exit 0
+
+          mkdir -p .caches
+          wget -O .caches/syncstorage-linux-amd64 \
+          "https://github.com/testit-tms/sync-storage-public/releases/download/${SYNC_STORAGE_VERSION}/syncstorage-${SYNC_STORAGE_VERSION}-linux_amd64"
+          chmod +x .caches/syncstorage-linux-amd64
+          nohup .caches/syncstorage-linux-amd64 --testRunId ${{ env.TMS_TEST_RUN_ID }} --port 49152 \
+          --baseURL ${{ env.TMS_URL }} --privateToken ${{ env.TMS_PRIVATE_TOKEN }}  > service.log 2>&1 & 
+          
+          sleep 1
+          
+          curl -v http://127.0.0.1:49152/health || true
+
+
+          ./gradlew test --no-daemon || true
+
+          sleep 1
+          
+          curl -v http://127.0.0.1:49152/wait-completion?testRunId=${{ env.TMS_TEST_RUN_ID }} || true
+          
+          cat service.log
+
       - name: Validate
         run: |
           dotnet test --configuration Debug --no-build --logger:"console;verbosity=detailed" api-validator-dotnet
