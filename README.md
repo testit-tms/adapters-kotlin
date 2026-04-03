@@ -34,7 +34,7 @@ You can change nothing, it's full compatible with previous versions of adapters 
 
 For CI/CD pipelines, we recommend starting the sync-storage instance before the adapter and waiting for its completion within the same job.
 
-You can see how we implement this [here.](https://github.com/testit-tms/adapters-kotlin/tree/main/.github/workflows/test.yml#84) 
+You can see how we implement this [here.](https://github.com/testit-tms/adapters-kotlin/tree/main/.github/workflows/test.yml#L84) 
 
 1. Create an empty test run using `testit-cli` or use an existing one, and save the `testRunId`.
 2. Start **sync-storage** with the correct parameters as a background process (alternatives to nohup can be used). Stream the log output to the `service.log` file:
