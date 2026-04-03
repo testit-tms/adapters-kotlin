@@ -7,7 +7,9 @@ import java.util.Properties
 data class AdapterConfig(
     private var mode: AdapterMode = AdapterMode.DEFAULT_UNIMPLEMENTED,
     var automaticCreationTestCases: Boolean = false,
-    var tmsIntegration: Boolean = true
+    var tmsIntegration: Boolean = true,
+    var importRealtime: Boolean = true,
+    var syncStoragePort: String = "49152"
 ) {
     constructor(properties: Properties) : this() {
         try {
@@ -33,6 +35,23 @@ data class AdapterConfig(
         } catch (e: Exception) {
             this.tmsIntegration = true
         }
+
+        try {
+            val importRealtimeValue =
+                properties.getProperty(AppProperties.IMPORT_REALTIME)?.toString()
+            this.importRealtime = importRealtimeValue != "false"
+        } catch (e: Exception) {
+            this.importRealtime = true
+        }
+
+        try {
+            val portValue = properties.getProperty(AppProperties.SYNC_STORAGE_PORT)?.toString()
+            if (!portValue.isNullOrBlank() && portValue != "null") {
+                this.syncStoragePort = portValue
+            }
+        } catch (e: Exception) {
+            this.syncStoragePort = "49152"
+        }
     }
 
     fun getMode(): AdapterMode {
@@ -45,6 +64,10 @@ data class AdapterConfig(
 
     fun shouldEnableTmsIntegration(): Boolean {
         return tmsIntegration
+    }
+
+    fun shouldImportRealtime(): Boolean {
+        return importRealtime
     }
 
     override fun toString(): String {

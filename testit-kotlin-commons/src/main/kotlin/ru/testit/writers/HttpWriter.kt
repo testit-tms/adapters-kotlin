@@ -48,6 +48,7 @@ class HttpWriter(
                         autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(
                             autoTestModel = autotest,
                             links = Converter.convertPutLinks(testResultCommon.linkItems),
+                            externalKey = testResultCommon.externalKey,
                             isFlaky = autotest.isFlaky)
                     }
 
