@@ -270,7 +270,7 @@ class SyncStorageRunner(
     }
 
     companion object {
-        const val SYNC_STORAGE_VERSION = "v0.1.27"
+        const val SYNC_STORAGE_VERSION = "v0.2.0-tms-5.7"
         const val SYNC_STORAGE_REPO_URL = "https://github.com/testit-tms/sync-storage-public/releases/download/"
         const val DEFAULT_PORT = "49152"
         const val STARTUP_TIMEOUT_SECONDS = 30
