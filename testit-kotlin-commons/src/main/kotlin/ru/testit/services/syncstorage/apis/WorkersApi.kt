@@ -24,6 +24,8 @@ import ru.testit.services.syncstorage.models.RegisterResponse
 import ru.testit.services.syncstorage.models.SetWorkerStatusRequest
 import ru.testit.services.syncstorage.models.SetWorkerStatusResponse
 
+import com.squareup.moshi.Json
+
 import ru.testit.services.syncstorage.infrastructure.ApiClient
 import ru.testit.services.syncstorage.infrastructure.ApiResponse
 import ru.testit.services.syncstorage.infrastructure.ClientException
@@ -31,10 +33,12 @@ import ru.testit.services.syncstorage.infrastructure.ClientError
 import ru.testit.services.syncstorage.infrastructure.ServerException
 import ru.testit.services.syncstorage.infrastructure.ServerError
 import ru.testit.services.syncstorage.infrastructure.MultiValueMap
+import ru.testit.services.syncstorage.infrastructure.PartConfig
 import ru.testit.services.syncstorage.infrastructure.RequestConfig
 import ru.testit.services.syncstorage.infrastructure.RequestMethod
 import ru.testit.services.syncstorage.infrastructure.ResponseType
 import ru.testit.services.syncstorage.infrastructure.Success
+import ru.testit.services.syncstorage.infrastructure.toMultiValue
 
 open class WorkersApi(basePath: kotlin.String = defaultBasePath, client: Call.Factory = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {

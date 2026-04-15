@@ -39,7 +39,7 @@ dependencies {
 }
 
 tasks.test {
-    exclude("**/tests/*")
+    exclude("**/services/*")
     useJUnitPlatform()
     testLogging {
         events = setOf(TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.PASSED)
