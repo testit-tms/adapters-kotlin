@@ -22,26 +22,14 @@ import com.squareup.moshi.JsonClass
 /**
  * 
  *
- * @param pid 
- * @param testRunId 
- * @param baseUrl 
- * @param privateToken 
+ * @param published 
  */
 
 
-data class RegisterRequest (
+data class InProgressPublishedResponse (
 
-    @Json(name = "pid")
-    val pid: kotlin.String? = null,
-
-    @Json(name = "testRunId")
-    val testRunId: kotlin.String? = null,
-
-    @Json(name = "baseUrl")
-    val baseUrl: kotlin.String? = null,
-
-    @Json(name = "privateToken")
-    val privateToken: kotlin.String? = null
+    @Json(name = "published")
+    val published: kotlin.Boolean? = null
 
 ) {
 

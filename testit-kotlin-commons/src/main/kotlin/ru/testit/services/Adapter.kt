@@ -41,7 +41,7 @@ object Adapter {
 
     @Deprecated("This method is no longer acceptable to compute time between versions. " +
             "Use Adapter.addLinks(String, String, String, LinkType) instead.")
-    suspend fun link(title: String, description: String, type: LinkType, url: String) {
+    suspend fun link(title: String, description: String, type: LinkType = LinkType.RELATED, url: String) {
         val link = LinkItem(
             title = title,
             description = description,
@@ -53,7 +53,7 @@ object Adapter {
 
     @Deprecated("This method is no longer acceptable to compute time between versions. " +
             "Use Adapter.addLinks(String, String, String, LinkType) instead.")
-    suspend fun addLink(url: String, title: String, description: String, type: LinkType) {
+    suspend fun addLink(url: String, title: String, description: String, type: LinkType = LinkType.RELATED) {
         val link = LinkItem(
             title =title,
             description = description,
@@ -64,7 +64,7 @@ object Adapter {
         addLinks(listOf(link))
     }
 
-    suspend fun addLinks(url: String, title: String, description: String, type: LinkType) {
+    suspend fun addLinks(url: String, title: String, description: String, type: LinkType = LinkType.RELATED) {
         val link = LinkItem(
             title =title,
             description = description,

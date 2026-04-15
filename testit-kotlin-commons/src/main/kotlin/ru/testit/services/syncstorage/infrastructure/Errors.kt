@@ -1,5 +1,4 @@
 @file:Suppress("unused")
-
 package ru.testit.services.syncstorage.infrastructure
 
 import java.lang.RuntimeException
