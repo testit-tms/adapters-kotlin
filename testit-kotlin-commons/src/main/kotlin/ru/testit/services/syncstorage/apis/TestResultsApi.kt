@@ -19,8 +19,11 @@ import java.io.IOException
 import okhttp3.Call
 import okhttp3.HttpUrl
 
+import ru.testit.services.syncstorage.models.InProgressPublishedResponse
 import ru.testit.services.syncstorage.models.TestResultCutApiModel
 import ru.testit.services.syncstorage.models.TestResultSaveResponse
+
+import com.squareup.moshi.Json
 
 import ru.testit.services.syncstorage.infrastructure.ApiClient
 import ru.testit.services.syncstorage.infrastructure.ApiResponse
@@ -29,10 +32,12 @@ import ru.testit.services.syncstorage.infrastructure.ClientError
 import ru.testit.services.syncstorage.infrastructure.ServerException
 import ru.testit.services.syncstorage.infrastructure.ServerError
 import ru.testit.services.syncstorage.infrastructure.MultiValueMap
+import ru.testit.services.syncstorage.infrastructure.PartConfig
 import ru.testit.services.syncstorage.infrastructure.RequestConfig
 import ru.testit.services.syncstorage.infrastructure.RequestMethod
 import ru.testit.services.syncstorage.infrastructure.ResponseType
 import ru.testit.services.syncstorage.infrastructure.Success
+import ru.testit.services.syncstorage.infrastructure.toMultiValue
 
 open class TestResultsApi(basePath: kotlin.String = defaultBasePath, client: Call.Factory = ApiClient.defaultClient) : ApiClient(basePath, client) {
     companion object {
@@ -40,6 +45,82 @@ open class TestResultsApi(basePath: kotlin.String = defaultBasePath, client: Cal
         val defaultBasePath: String by lazy {
             System.getProperties().getProperty(ApiClient.baseUrlKey, "http://localhost")
         }
+    }
+
+    /**
+     * GET /in_progress_published
+     * Get in-progress published state
+     *  Get whether in-progress status has already been published by master node.
+     * @param testRunId Test Run ID
+     * @return InProgressPublishedResponse
+     * @throws IllegalStateException If the request is not correctly configured
+     * @throws IOException Rethrows the OkHttp execute method exception
+     * @throws UnsupportedOperationException If the API returns an informational or redirection response
+     * @throws ClientException If the API returns a client error response
+     * @throws ServerException If the API returns a server error response
+     */
+    @Suppress("UNCHECKED_CAST")
+    @Throws(IllegalStateException::class, IOException::class, UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun inProgressPublishedGet(testRunId: kotlin.String) : InProgressPublishedResponse {
+        val localVarResponse = inProgressPublishedGetWithHttpInfo(testRunId = testRunId)
+
+        return when (localVarResponse.responseType) {
+            ResponseType.Success -> (localVarResponse as Success<*>).data as InProgressPublishedResponse
+            ResponseType.Informational -> throw UnsupportedOperationException("Client does not support Informational responses.")
+            ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
+            ResponseType.ClientError -> {
+                val localVarError = localVarResponse as ClientError<*>
+                throw ClientException("Client error : ${localVarError.statusCode} ${localVarError.message.orEmpty()}", localVarError.statusCode, localVarResponse)
+            }
+            ResponseType.ServerError -> {
+                val localVarError = localVarResponse as ServerError<*>
+                throw ServerException("Server error : ${localVarError.statusCode} ${localVarError.message.orEmpty()} ${localVarError.body}", localVarError.statusCode, localVarResponse)
+            }
+        }
+    }
+
+    /**
+     * GET /in_progress_published
+     * Get in-progress published state
+     *  Get whether in-progress status has already been published by master node.
+     * @param testRunId Test Run ID
+     * @return ApiResponse<InProgressPublishedResponse?>
+     * @throws IllegalStateException If the request is not correctly configured
+     * @throws IOException Rethrows the OkHttp execute method exception
+     */
+    @Suppress("UNCHECKED_CAST")
+    @Throws(IllegalStateException::class, IOException::class)
+    fun inProgressPublishedGetWithHttpInfo(testRunId: kotlin.String) : ApiResponse<InProgressPublishedResponse?> {
+        val localVariableConfig = inProgressPublishedGetRequestConfig(testRunId = testRunId)
+
+        return request<Unit, InProgressPublishedResponse>(
+            localVariableConfig
+        )
+    }
+
+    /**
+     * To obtain the request config of the operation inProgressPublishedGet
+     *
+     * @param testRunId Test Run ID
+     * @return RequestConfig
+     */
+    fun inProgressPublishedGetRequestConfig(testRunId: kotlin.String) : RequestConfig<Unit> {
+        val localVariableBody = null
+        val localVariableQuery: MultiValueMap = mutableMapOf<kotlin.String, kotlin.collections.List<kotlin.String>>()
+            .apply {
+                put("testRunId", listOf(testRunId.toString()))
+            }
+        val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
+        localVariableHeaders["Accept"] = "application/json"
+
+        return RequestConfig(
+            method = RequestMethod.GET,
+            path = "/in_progress_published",
+            query = localVariableQuery,
+            headers = localVariableHeaders,
+            requiresAuthentication = false,
+            body = localVariableBody
+        )
     }
 
     /**

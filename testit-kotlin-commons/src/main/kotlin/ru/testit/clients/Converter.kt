@@ -406,6 +406,7 @@ class Converter {
                     title = link.title,
                     description = link.description,
                     type = link.type?.let { LinkType.valueOf(it.value) }
+                        ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
                 )
                 model
             }.collect(Collectors.toList())
@@ -424,6 +425,7 @@ class Converter {
                     title = link.title,
                     description = link.description,
                     type = link.type?.let { LinkType.valueOf(it.value) }
+                        ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
                 )
                 model
             }.collect(Collectors.toList())
@@ -442,6 +444,7 @@ class Converter {
                     title = link.title,
                     description = link.description,
                     type = link.type?.let { LinkType.valueOf(it.value) }
+                        ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
                 )
                 model
             }.collect(Collectors.toList())

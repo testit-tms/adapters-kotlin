@@ -1,7 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 group = "ru.testit"
-version = "1.0.1"
+version = "1.0.2"
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -39,7 +39,7 @@ dependencies {
 }
 
 tasks.test {
-    exclude("**/tests/*")
+    exclude("**/services/*")
     useJUnitPlatform()
     testLogging {
         events = setOf(TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.PASSED)

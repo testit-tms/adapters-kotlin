@@ -8,5 +8,5 @@ annotation class Link(
     val url: String,
     val title: String = "",
     val description: String = "",
-    val type: LinkType
+    val type: LinkType = LinkType.RELATED
 )

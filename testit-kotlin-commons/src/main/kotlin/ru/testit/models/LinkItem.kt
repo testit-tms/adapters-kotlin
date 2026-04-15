@@ -9,7 +9,7 @@ data class LinkItem (
     var title: String,
     var url: String,
     var description: String,
-    var type: LinkType
+    var type: LinkType = LinkType.RELATED
 ) {
 
     override fun toString() =
