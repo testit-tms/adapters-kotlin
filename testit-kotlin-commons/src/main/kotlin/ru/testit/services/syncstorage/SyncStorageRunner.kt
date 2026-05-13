@@ -84,6 +84,8 @@ class SyncStorageRunner(
 
             process = processBuilder.start()
 
+            
+            /**
             // Read output in background
             Thread({
                 try {
@@ -94,6 +96,7 @@ class SyncStorageRunner(
                     logger.debug("SyncStorage output reader stopped: ${e.message}")
                 }
             }, "sync-storage-output-reader").apply { isDaemon = true }.start()
+            */
 
             // Wait for startup
             if (!waitForStartup()) {
@@ -270,7 +273,7 @@ class SyncStorageRunner(
     }
 
     companion object {
-        const val SYNC_STORAGE_VERSION = "v0.3.0"
+        const val SYNC_STORAGE_VERSION = "v0.3.2"
         const val SYNC_STORAGE_REPO_URL = "https://github.com/testit-tms/sync-storage-public/releases/download/"
         const val DEFAULT_PORT = "49152"
         const val STARTUP_TIMEOUT_SECONDS = 30
