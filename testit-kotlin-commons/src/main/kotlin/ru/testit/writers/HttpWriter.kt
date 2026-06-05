@@ -167,7 +167,28 @@ class HttpWriter(
                     }
                     try {
                         val testResult = test.get()
-                        val autotestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!) ?: return
+
+                        val beforeResultEach = Converter.convertResultFixture(cl.get().beforeEachTest, testUuid)
+                        val beforeResultFinish = ArrayList(beforeResultAll).apply {
+                            addAll(beforeResultClass)
+                            addAll(beforeResultEach)
+                        }
+
+                        val afterResultEach = Converter.convertResultFixture(cl.get().afterEachTest, testUuid)
+                        val afterResultFinish = ArrayList<AttachmentPutModelAutoTestStepResultsModel>().apply {
+                            addAll(afterResultEach)
+                            addAll(afterResultClass)
+                            addAll(afterResultAll)
+                        }
+
+                        val testResultId = testResults[testResult.uuid]
+                        if (testResultId == null) {
+                            writeBufferedTest(
+                                testResult, cl.get(), beforeAll, afterAll, beforeResultFinish, afterResultFinish)
+                            continue
+                        }
+
+                        val autotestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!) ?: continue
 
                         val beforeFinish = ArrayList(beforeAll).apply {
                             if (autotestApiResult.setup != null)
@@ -184,26 +205,7 @@ class HttpWriter(
 
                         apiClient.updateAutoTest(autoTestUpdateApiModel)
 
-                        val beforeResultEach = Converter.convertResultFixture(cl.get().beforeEachTest, testUuid)
-                        val beforeResultFinish = ArrayList(beforeResultAll).apply {
-                            addAll(beforeResultClass)
-                            addAll(beforeResultEach)
-                        }
-
-                        val afterResultEach = Converter.convertResultFixture(cl.get().afterEachTest, testUuid)
-                        val afterResultFinish = ArrayList<AttachmentPutModelAutoTestStepResultsModel>().apply {
-                            addAll(afterResultEach)
-                            addAll(afterResultClass)
-                            addAll(afterResultAll)
-                        }
-
-                        val autoTestResultsForTestRunModel =
-                            Converter.testResultToAutoTestResultsForTestRunModel(
-                                testResult, null, beforeResultFinish, afterResultFinish)
-
-                        val testResultId = testResults[testResult.uuid]
-
-                        val resultModel = apiClient.getTestResult(testResultId!!)
+                        val resultModel = apiClient.getTestResult(testResultId)
                         val beforeResult = modelToRequest(beforeResultFinish)
                         val afterResult = modelToRequest(afterResultFinish)
 
@@ -220,6 +222,44 @@ class HttpWriter(
         }
     } catch (e: Exception) {
         LOGGER.error("Error during test writing: ${e.message}")
+    }
+
+    private fun writeBufferedTest(
+        testResult: TestResultCommon,
+        classContainer: ClassContainer,
+        beforeAll: MutableList<AutoTestStepApiResult>,
+        afterAll: MutableList<AutoTestStepApiResult>,
+        beforeResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
+        afterResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
+    ) {
+        val beforeFinish = ArrayList(beforeAll)
+        val afterClass = Converter.convertFixture(classContainer.afterClassMethods, null)
+        val afterFinish = ArrayList<AutoTestStepApiResult>().apply {
+            addAll(afterClass)
+            addAll(afterAll)
+        }
+
+        var autotest = apiClient.getAutoTestByExternalId(testResult.externalId!!)
+        if (autotest == null) {
+            apiClient.createAutoTest(
+                Converter.testResultToAutoTestPostModel(testResult, UUID.fromString(config.projectId)))
+            autotest = apiClient.getAutoTestByExternalId(testResult.externalId!!)!!
+        } else {
+            beforeFinish.addAll(autotest.setup ?: emptyList())
+            afterFinish.addAll(0, autotest.teardown ?: emptyList())
+        }
+
+        apiClient.updateAutoTest(Converter.autoTestModelToAutoTestUpdateApiModel(
+            autotest, beforeFinish, afterFinish, autotest.isFlaky))
+
+        if (testResult.workItemIds.isNotEmpty()) {
+            updateTestLinkToWorkItems(autotest.id.toString(), testResult.workItemIds)
+        }
+
+        val model = Converter.testResultToAutoTestResultsForTestRunModel(
+            testResult, UUID.fromString(config.configurationId), beforeResultFinish, afterResultFinish)
+        val ids = apiClient.sendTestResults(config.testRunId, listOf(model))
+        testResults[testResult.uuid!!] = UUID.fromString(ids[0])
     }
 
     fun modelToRequest(models: List<AttachmentPutModelAutoTestStepResultsModel>): List<AutoTestStepResultUpdateRequest> {

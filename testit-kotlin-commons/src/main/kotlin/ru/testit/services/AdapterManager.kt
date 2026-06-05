@@ -204,7 +204,9 @@ class AdapterManager(
 
         if (LOGGER.isDebugEnabled) LOGGER.debug("Stop class container {}", container)
 
-        writer?.writeClass(container)
+        if (adapterConfig.shouldImportRealtime()) {
+            writer?.writeClass(container)
+        }
     }
 
     fun updateClassContainer(uuid: String, update: Consumer<ClassContainer>) {
@@ -307,6 +309,10 @@ class AdapterManager(
 
         // Try sync storage in-progress flow first (master worker only)
         if (trySyncStorageInProgress(testResult)) {
+            return
+        }
+
+        if (!adapterConfig.shouldImportRealtime()) {
             return
         }
 

@@ -42,6 +42,8 @@ implementation "ru.testit:testit-adapter-kotest:0.1.1"
 | It enables/disables TMS integration (**It's optional**). Default value - true                                                                                                                                                                                                                                       | testIt                            | TMS_TEST_IT                                | tmsTestIt                            |
 | Mode of automatic creation test cases (**It's optional**). Default value - false. The adapter supports following modes:<br/>true - in this mode, the adapter will create a test case linked to the created autotest (not to the updated autotest)<br/>false - in this mode, the adapter will not create a test case | automaticCreationTestCases        | TMS_AUTOMATIC_CREATION_TEST_CASES          | tmsAutomaticCreationTestCases        |
 | Mode of automatic updation links to test cases (**It's optional**). Default value - false. The adapter supports following modes:<br/>true - in this mode, the adapter will update links to test cases<br/>false - in this mode, the adapter will not update link to test cases                                      | automaticUpdationLinksToTestCases | TMS_AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES | tmsAutomaticUpdationLinksToTestCases |
+| Real-time test result upload (**It's optional**). Default value - true. See [import-realtime spec](../../docs/import-realtime.md):<br/>true - each test result is sent to TMS immediately (first test via Sync Storage as InProgress)<br/>false - results are buffered and sent in batch at suite end with fixtures | importRealtime                    | TMS_IMPORT_REALTIME                        | tmsImportRealtime                    |
+| Sync Storage port (**It's optional**). Default value - 49152                                                                                                                                                                                                                                                        | syncStoragePort                   | TMS_SYNC_STORAGE_PORT                      | tmsSyncStoragePort                   |
 | Name of the configuration file If it is not provided, it is used default file name (**It's optional**)                                                                                                                                                                                                              | -                                 | TMS_CONFIG_FILE                            | tmsConfigFile                        |
 
 #### File
@@ -59,6 +61,8 @@ automaticCreationTestCases=AUTOMATIC_CREATION_TEST_CASES
 automaticUpdationLinksToTestCases=AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES
 certValidation=CERT_VALIDATION
 testIt=TEST_IT
+importRealtime=IMPORT_REALTIME
+syncStoragePort=SYNC_STORAGE_PORT
 ```
 
 
