@@ -13,7 +13,6 @@ import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
 import ru.testit.models.TestResultCommon
 import ru.testit.services.ResultStorage
-import ru.testit.clients.Converter.Companion.toModel
 import java.util.Collections.addAll
 
 class HttpWriter(
@@ -33,56 +32,23 @@ class HttpWriter(
                 LOGGER.debug("Write auto test {}", testResultCommon.externalId)
             }
 
-            val autotest = apiClient.getAutoTestByExternalId(testResultCommon.externalId!!)
-            val workItemIds = testResultCommon.workItemIds
-            var autoTestId: String? = null
+            upsertAutoTest(testResultCommon, null, null)
 
-            if (autotest != null) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Auto test is exist. Update auto test {}", testResultCommon.externalId)
+            val existingId = resolveTestResultId(testResultCommon)
+            if (existingId != null) {
+                testResults[testResultCommon.uuid!!] = existingId
+                if (testResultCommon.itemStatus == ItemStatus.INPROGRESS) {
+                    return
                 }
-
-                val autoTestUpdateApiModel: AutoTestUpdateApiModel
-                when {
-                    testResultCommon.itemStatus == ItemStatus.FAILED -> {
-                        autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(
-                            autoTestModel = autotest,
-                            links = Converter.convertPutLinks(testResultCommon.linkItems),
-                            externalKey = testResultCommon.externalKey,
-                            isFlaky = autotest.isFlaky)
-                    }
-
-                    else -> {
-                        autoTestUpdateApiModel = Converter.testResultToAutoTestPutModel(
-                            result = testResultCommon,
-                            projectId = UUID.fromString(config.projectId),
-                            isFlaky = autotest.isFlaky)
-                    }
-                }
-
-//                autoTestUpdateApiModel.isFlaky = autotest.isFlaky
-                apiClient.updateAutoTest(autoTestUpdateApiModel)
-                autoTestId = autotest.id.toString()
-            } else {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Create new auto test {}", testResultCommon.externalId)
-                }
-
-                val model = Converter.testResultToAutoTestPostModel(testResultCommon, UUID.fromString(config.projectId))
-                autoTestId = apiClient.createAutoTest(model)
-            }
-
-            if (!workItemIds.isEmpty()) {
-                updateTestLinkToWorkItems(autoTestId!!, workItemIds)
+                updateTestResult(existingId, testResultCommon, null, null)
+                return
             }
 
             val autoTestResultsForTestRunModel = Converter.testResultToAutoTestResultsForTestRunModel(
                 testResultCommon, UUID.fromString(config.configurationId))
 
-            val results: MutableList<AutoTestResultsForTestRunModel> = mutableListOf()
-            results.add(autoTestResultsForTestRunModel)
             LOGGER.debug("send result by testRunId: " + config.testRunId)
-            val ids = apiClient.sendTestResults(config.testRunId, results)
+            val ids = apiClient.sendTestResults(config.testRunId, listOf(autoTestResultsForTestRunModel))
             testResults[testResultCommon.uuid!!] = UUID.fromString(ids[0])
         } catch (e: Exception) {
             LOGGER.error("Can not write the autotest: {}", e.message)
@@ -90,7 +56,6 @@ class HttpWriter(
         catch (e: ClientException) {
             LOGGER.error("Can not write the autotest: {}", e.message)
             LOGGER.error("body: {}", e.response!!.getPrivateProperty("body"))
-//             Json.encodeToString(e.response..toString()))
         }
     }
 
@@ -167,22 +132,6 @@ class HttpWriter(
                     }
                     try {
                         val testResult = test.get()
-                        val autotestApiResult = apiClient.getAutoTestByExternalId(testResult.externalId!!) ?: return
-
-                        val beforeFinish = ArrayList(beforeAll).apply {
-                            if (autotestApiResult.setup != null)
-                                addAll(autotestApiResult.setup!!)
-                        }
-                        val afterClass = Converter.convertFixture(cl.get().afterClassMethods, null)
-                        val afterFinish = autotestApiResult.teardown.apply {
-                            addAll(afterClass)
-                            addAll(afterAll)
-                        }
-                        val autoTestUpdateApiModel = Converter.autoTestModelToAutoTestUpdateApiModel(autotestApiResult,
-                            beforeFinish, afterFinish, autotestApiResult.isFlaky
-                        )
-
-                        apiClient.updateAutoTest(autoTestUpdateApiModel)
 
                         val beforeResultEach = Converter.convertResultFixture(cl.get().beforeEachTest, testUuid)
                         val beforeResultFinish = ArrayList(beforeResultAll).apply {
@@ -197,21 +146,14 @@ class HttpWriter(
                             addAll(afterResultAll)
                         }
 
-                        val autoTestResultsForTestRunModel =
-                            Converter.testResultToAutoTestResultsForTestRunModel(
-                                testResult, null, beforeResultFinish, afterResultFinish)
-
-                        val testResultId = testResults[testResult.uuid]
-
-                        val resultModel = apiClient.getTestResult(testResultId!!)
-                        val beforeResult = modelToRequest(beforeResultFinish)
-                        val afterResult = modelToRequest(afterResultFinish)
-
-                        val model = Converter.testResultToTestResultUpdateModel(resultModel,
-                            beforeResult, afterResult)
-
-                        apiClient.updateTestResult(testResultId, model)
-
+                        publishTestResultAtEnd(
+                            testResult,
+                            cl.get(),
+                            beforeAll,
+                            afterAll,
+                            beforeResultFinish,
+                            afterResultFinish,
+                        )
                     } catch (e: Exception) {
                         LOGGER.error("Can not update the autotest: ${e.toString()}")
                     }
@@ -220,6 +162,133 @@ class HttpWriter(
         }
     } catch (e: Exception) {
         LOGGER.error("Error during test writing: ${e.message}")
+    }
+
+    private fun publishTestResultAtEnd(
+        testResult: TestResultCommon,
+        classContainer: ClassContainer,
+        beforeAll: MutableList<AutoTestStepApiResult>,
+        afterAll: MutableList<AutoTestStepApiResult>,
+        beforeResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
+        afterResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
+    ) {
+        val (beforeFinish, afterFinish) = buildAutoTestFixtures(
+            testResult, classContainer, beforeAll, afterAll)
+
+        upsertAutoTest(testResult, beforeFinish, afterFinish)
+
+        val model = Converter.testResultToAutoTestResultsForTestRunModel(
+            testResult, UUID.fromString(config.configurationId), beforeResultFinish, afterResultFinish)
+
+        val existingId = resolveTestResultId(testResult)
+        if (existingId != null && isInProgressInTms(existingId)) {
+            val ids = apiClient.sendTestResults(config.testRunId, listOf(model))
+            testResults[testResult.uuid!!] = UUID.fromString(ids[0])
+            return
+        }
+
+        if (existingId != null) {
+            updateTestResult(existingId, testResult, beforeResultFinish, afterResultFinish)
+            testResults[testResult.uuid!!] = existingId
+            return
+        }
+
+        val ids = apiClient.sendTestResults(config.testRunId, listOf(model))
+        testResults[testResult.uuid!!] = UUID.fromString(ids[0])
+    }
+
+    private fun isInProgressInTms(testResultId: UUID): Boolean {
+        val status = apiClient.getTestResult(testResultId).status ?: return false
+        return status.code.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
+            || status.name.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
+    }
+
+    private fun buildAutoTestFixtures(
+        testResult: TestResultCommon,
+        classContainer: ClassContainer,
+        beforeAll: MutableList<AutoTestStepApiResult>,
+        afterAll: MutableList<AutoTestStepApiResult>,
+    ): Pair<MutableList<AutoTestStepApiResult>, MutableList<AutoTestStepApiResult>> {
+        val testUuid = testResult.uuid!!
+        val beforeFinish = ArrayList(beforeAll)
+        beforeFinish.addAll(Converter.convertFixture(classContainer.beforeClassMethods, null))
+        beforeFinish.addAll(Converter.convertFixture(classContainer.beforeEachTest, testUuid))
+
+        val afterFinish = ArrayList<AutoTestStepApiResult>()
+        afterFinish.addAll(Converter.convertFixture(classContainer.afterClassMethods, null))
+        afterFinish.addAll(Converter.convertFixture(classContainer.afterEachTest, testUuid))
+        afterFinish.addAll(afterAll)
+        return beforeFinish to afterFinish
+    }
+
+    private fun upsertAutoTest(
+        testResult: TestResultCommon,
+        beforeFinish: MutableList<AutoTestStepApiResult>?,
+        afterFinish: MutableList<AutoTestStepApiResult>?,
+    ) {
+        val autotest = apiClient.getAutoTestByExternalId(testResult.externalId!!)
+        var autoTestId: String
+
+        if (autotest != null) {
+            val autoTestUpdateApiModel = when {
+                beforeFinish != null && afterFinish != null -> {
+                    Converter.autoTestModelToAutoTestUpdateApiModel(
+                        autotest, beforeFinish, afterFinish, autotest.isFlaky)
+                }
+                testResult.itemStatus == ItemStatus.FAILED -> {
+                    Converter.autoTestModelToAutoTestUpdateApiModel(
+                        autoTestModel = autotest,
+                        links = Converter.convertPutLinks(testResult.linkItems),
+                        externalKey = testResult.externalKey,
+                        isFlaky = autotest.isFlaky)
+                }
+                else -> {
+                    Converter.testResultToAutoTestPutModel(
+                        result = testResult,
+                        projectId = UUID.fromString(config.projectId),
+                        isFlaky = autotest.isFlaky)
+                }
+            }
+            apiClient.updateAutoTest(autoTestUpdateApiModel)
+            autoTestId = autotest.id.toString()
+        } else {
+            autoTestId = apiClient.createAutoTest(
+                Converter.testResultToAutoTestPostModel(testResult, UUID.fromString(config.projectId)))
+            if (beforeFinish != null && afterFinish != null) {
+                val created = apiClient.getAutoTestByExternalId(testResult.externalId!!)!!
+                apiClient.updateAutoTest(Converter.autoTestModelToAutoTestUpdateApiModel(
+                    created, beforeFinish, afterFinish, created.isFlaky))
+            }
+        }
+
+        if (testResult.workItemIds.isNotEmpty()) {
+            updateTestLinkToWorkItems(autoTestId, testResult.workItemIds)
+        }
+    }
+
+    private fun resolveTestResultId(testResult: TestResultCommon): UUID? {
+        testResults[testResult.uuid]?.let { return it }
+        return apiClient.getTestResultIdByExternalId(
+            config.testRunId,
+            config.configurationId,
+            testResult.externalId!!,
+        )?.also { testResults[testResult.uuid!!] = it }
+    }
+
+    private fun updateTestResult(
+        testResultId: UUID,
+        testResult: TestResultCommon,
+        beforeResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>?,
+        afterResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>?,
+    ) {
+        val existing = apiClient.getTestResult(testResultId)
+        val model = Converter.testResultCommonToTestResultUpdateModel(
+            testResult,
+            existing,
+            beforeResultFinish?.let { modelToRequest(it) },
+            afterResultFinish?.let { modelToRequest(it) },
+        )
+        apiClient.updateTestResult(testResultId, model)
     }
 
     fun modelToRequest(models: List<AttachmentPutModelAutoTestStepResultsModel>): List<AutoTestStepResultUpdateRequest> {
@@ -270,4 +339,3 @@ class HttpWriter(
     }
 
 }
-

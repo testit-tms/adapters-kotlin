@@ -26,6 +26,11 @@ Supported test frameworks :
 - New logic with a fix for test results loading
 - Added sync-storage subprocess usage for worker synchronization on port **49152** by defailt.
 
+## What's new in 1.1.0?
+
+- Added `importRealtime` flag: real-time upload (default) or deferred batch upload at suite end. See [docs/import-realtime.md](docs/import-realtime.md).
+- `LinkType` for links defaults to `Related` when not specified.
+
 ### How to run 1.0+ locally?
 
 You can change nothing, it's full compatible with previous versions of adapters for local run on all OS.

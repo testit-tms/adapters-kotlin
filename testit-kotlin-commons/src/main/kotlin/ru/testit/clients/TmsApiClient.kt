@@ -160,6 +160,18 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
                 .mapNotNull { it.autoTest?.externalId }.toList()
     }
 
+    override fun getTestResultIdByExternalId(
+        testRunUuid: String,
+        configurationId: String,
+        externalId: String,
+    ): UUID? {
+        val model = testRunsApi.getTestRunById(UUID.fromString(testRunUuid))
+        val configUUID = UUID.fromString(configurationId)
+        return model.testResults
+            ?.firstOrNull { it.configurationId == configUUID && it.autoTest?.externalId == externalId }
+            ?.id
+    }
+
     override fun getTestResult(uuid: UUID): TestResultResponse  {
         return testResultsApi.apiV2TestResultsIdGet(uuid)
     }

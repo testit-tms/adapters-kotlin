@@ -204,7 +204,9 @@ class AdapterManager(
 
         if (LOGGER.isDebugEnabled) LOGGER.debug("Stop class container {}", container)
 
-        writer?.writeClass(container)
+        if (adapterConfig.shouldImportRealtime()) {
+            writer?.writeClass(container)
+        }
     }
 
     fun updateClassContainer(uuid: String, update: Consumer<ClassContainer>) {
@@ -307,6 +309,10 @@ class AdapterManager(
 
         // Try sync storage in-progress flow first (master worker only)
         if (trySyncStorageInProgress(testResult)) {
+            return
+        }
+
+        if (!adapterConfig.shouldImportRealtime()) {
             return
         }
 
@@ -664,6 +670,7 @@ class AdapterManager(
 
         runner.isAlreadyInProgress = true
 
+        val finalStatus = testResult.itemStatus
         try {
             testResult.itemStatus = ItemStatus.INPROGRESS
             writer?.writeTest(testResult)
@@ -672,6 +679,8 @@ class AdapterManager(
             LOGGER.warn("Error in sync storage in-progress handling, falling back: ${e.message}")
             runner.isAlreadyInProgress = false
             return false
+        } finally {
+            testResult.itemStatus = finalStatus
         }
     }
 
