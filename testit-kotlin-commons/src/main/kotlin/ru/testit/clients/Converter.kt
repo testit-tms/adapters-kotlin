@@ -84,6 +84,39 @@ class Converter {
             return model
         }
 
+        fun testResultCommonToTestResultUpdateModel(
+            testResult: TestResultCommon,
+            existing: TestResultResponse,
+            setupResults: List<AutoTestStepResultUpdateRequest>?,
+            teardownResults: List<AutoTestStepResultUpdateRequest>?,
+        ): TestResultUpdateV2Request {
+            val throwable = testResult.throwable
+            val duration = if (testResult.start != null && testResult.stop != null) {
+                testResult.stop!! - testResult.start!!
+            } else {
+                existing.durationInMs
+            }
+            return TestResultUpdateV2Request(
+                failureClassIds = existing.failureClassIds,
+                statusCode = testResult.itemStatus?.value,
+                statusType = mapStatusType(testResult.itemStatus?.value ?: ""),
+                links = existing.links,
+                stepResults = existing.stepResults,
+                attachments = when {
+                    testResult.attachments.isNotEmpty() ->
+                        convertAttachments(testResult.attachments)!!.map { AttachmentUpdateRequest(id = it.id) }
+                    existing.attachments != null -> convertAttachmentsFromResult(existing.attachments!!)
+                    else -> null
+                },
+                durationInMs = duration,
+                duration = duration,
+                setupResults = setupResults,
+                teardownResults = teardownResults,
+                message = throwable?.message ?: testResult.message ?: existing.message,
+                trace = throwable?.stackTraceToString() ?: existing.traces,
+            )
+        }
+
         fun convertFixture(fixtures: List<FixtureResult>, parentUuid: String?): MutableList<AutoTestStepApiResult> {
             return fixtures.stream()
                 .filter { filterSteps(parentUuid, it) }

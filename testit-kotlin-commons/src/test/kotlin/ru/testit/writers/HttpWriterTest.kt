@@ -45,6 +45,7 @@ class HttpWriterTest {
         // request.id = null
 
         every { client.getAutoTestByExternalId(testResult.externalId!!) } returns response
+        every { client.getTestResultIdByExternalId(any(), any(), any()) } returns null
         every { client.sendTestResults(any(), any()) } returns strUuids
         justRun { client.updateAutoTest(any()) }
         every { client.getWorkItemsLinkedToTest(any()) } returns mutableListOf()

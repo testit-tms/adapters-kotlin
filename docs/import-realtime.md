@@ -117,8 +117,8 @@ Steps:
 3. **End of suite** (`stopMainContainer`):
    - `HttpWriter.writeTests` sends all buffered tests in one pass:
      - create/update autotest metadata with fixture definitions
-     - `sendTestResults` with final status and fixture results (`setupResults` / `teardownResults`)
-   - Already uploaded in-progress test is updated via `updateTestResult` (existing path)
+     - if a test result already exists in the test run (e.g. first test was `InProgress` via Sync Storage), **`updateTestResult`** is used
+     - otherwise `sendTestResults` creates a new result with final status and fixture results
 
 ## Fixtures and attachments
 
@@ -142,7 +142,8 @@ Attachments uploaded via `Adapter.addAttachments` during a test are stored by id
 | `AdapterManager.stopTestCase()` | Sync Storage path always; skips `writeTest` when `importRealtime=false` |
 | `AdapterManager.stopClassContainer()` | Calls `writeClass` only when `importRealtime=true` |
 | `AdapterManager.stopMainContainer()` | Always calls `writeTests` |
-| `HttpWriter.writeBufferedTest()` | Initial send for buffered tests with fixtures |
+| `HttpWriter.publishTestResultAtEnd()` | Batch send/update for buffered tests with fixtures |
+| `ApiClient.getTestResultIdByExternalId()` | Resolves existing test result in run to avoid duplicate launches |
 | `SyncStorageRunner` | Unchanged; started regardless of `importRealtime` |
 
 ## CI example

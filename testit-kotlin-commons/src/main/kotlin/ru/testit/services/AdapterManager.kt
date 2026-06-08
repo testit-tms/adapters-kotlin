@@ -670,6 +670,7 @@ class AdapterManager(
 
         runner.isAlreadyInProgress = true
 
+        val finalStatus = testResult.itemStatus
         try {
             testResult.itemStatus = ItemStatus.INPROGRESS
             writer?.writeTest(testResult)
@@ -678,6 +679,8 @@ class AdapterManager(
             LOGGER.warn("Error in sync storage in-progress handling, falling back: ${e.message}")
             runner.isAlreadyInProgress = false
             return false
+        } finally {
+            testResult.itemStatus = finalStatus
         }
     }
 

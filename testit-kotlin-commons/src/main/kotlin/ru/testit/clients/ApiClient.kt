@@ -61,6 +61,10 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
+    fun getTestResultIdByExternalId(testRunUuid: String, configurationId: String, externalId: String): UUID?
+
+    @Throws(IllegalStateException::class, IOException::class,
+        UnsupportedOperationException::class, ClientException::class, ServerException::class)
     fun getTestResult(uuid: UUID): TestResultResponse
 
     @Throws(IllegalStateException::class, IOException::class,
