@@ -36,8 +36,11 @@ class HttpWriter(
 
             val existingId = resolveTestResultId(testResultCommon)
             if (existingId != null) {
-                updateTestResult(existingId, testResultCommon, null, null)
                 testResults[testResultCommon.uuid!!] = existingId
+                if (testResultCommon.itemStatus == ItemStatus.INPROGRESS) {
+                    return
+                }
+                updateTestResult(existingId, testResultCommon, null, null)
                 return
             }
 
@@ -178,17 +181,30 @@ class HttpWriter(
 
         upsertAutoTest(testResult, beforeFinish, afterFinish)
 
+        val model = Converter.testResultToAutoTestResultsForTestRunModel(
+            testResult, UUID.fromString(config.configurationId), beforeResultFinish, afterResultFinish)
+
         val existingId = resolveTestResultId(testResult)
+        if (existingId != null && isInProgressInTms(existingId)) {
+            val ids = apiClient.sendTestResults(config.testRunId, listOf(model))
+            testResults[testResult.uuid!!] = UUID.fromString(ids[0])
+            return
+        }
+
         if (existingId != null) {
             updateTestResult(existingId, testResult, beforeResultFinish, afterResultFinish)
             testResults[testResult.uuid!!] = existingId
             return
         }
 
-        val model = Converter.testResultToAutoTestResultsForTestRunModel(
-            testResult, UUID.fromString(config.configurationId), beforeResultFinish, afterResultFinish)
         val ids = apiClient.sendTestResults(config.testRunId, listOf(model))
         testResults[testResult.uuid!!] = UUID.fromString(ids[0])
+    }
+
+    private fun isInProgressInTms(testResultId: UUID): Boolean {
+        val status = apiClient.getTestResult(testResultId).status ?: return false
+        return status.code.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
+            || status.name.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
     }
 
     private fun upsertAutoTest(

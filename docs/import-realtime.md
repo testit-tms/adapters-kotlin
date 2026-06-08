@@ -117,7 +117,8 @@ Steps:
 3. **End of suite** (`stopMainContainer`):
    - `HttpWriter.writeTests` sends all buffered tests in one pass:
      - create/update autotest metadata with fixture definitions
-     - if a test result already exists in the test run (e.g. first test was `InProgress` via Sync Storage), **`updateTestResult`** is used
+     - if a test result exists with **`InProgress`** status (first test via Sync Storage), final status is set via **`sendTestResults`** (not PUT)
+     - if a test result already exists with a terminal status (realtime mode), **`updateTestResult`** enriches fixtures only
      - otherwise `sendTestResults` creates a new result with final status and fixture results
 
 ## Fixtures and attachments
