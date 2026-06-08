@@ -172,12 +172,8 @@ class HttpWriter(
         beforeResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
         afterResultFinish: List<AttachmentPutModelAutoTestStepResultsModel>,
     ) {
-        val beforeFinish = ArrayList(beforeAll)
-        val afterClass = Converter.convertFixture(classContainer.afterClassMethods, null)
-        val afterFinish = ArrayList<AutoTestStepApiResult>().apply {
-            addAll(afterClass)
-            addAll(afterAll)
-        }
+        val (beforeFinish, afterFinish) = buildAutoTestFixtures(
+            testResult, classContainer, beforeAll, afterAll)
 
         upsertAutoTest(testResult, beforeFinish, afterFinish)
 
@@ -207,6 +203,24 @@ class HttpWriter(
             || status.name.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
     }
 
+    private fun buildAutoTestFixtures(
+        testResult: TestResultCommon,
+        classContainer: ClassContainer,
+        beforeAll: MutableList<AutoTestStepApiResult>,
+        afterAll: MutableList<AutoTestStepApiResult>,
+    ): Pair<MutableList<AutoTestStepApiResult>, MutableList<AutoTestStepApiResult>> {
+        val testUuid = testResult.uuid!!
+        val beforeFinish = ArrayList(beforeAll)
+        beforeFinish.addAll(Converter.convertFixture(classContainer.beforeClassMethods, null))
+        beforeFinish.addAll(Converter.convertFixture(classContainer.beforeEachTest, testUuid))
+
+        val afterFinish = ArrayList<AutoTestStepApiResult>()
+        afterFinish.addAll(Converter.convertFixture(classContainer.afterClassMethods, null))
+        afterFinish.addAll(Converter.convertFixture(classContainer.afterEachTest, testUuid))
+        afterFinish.addAll(afterAll)
+        return beforeFinish to afterFinish
+    }
+
     private fun upsertAutoTest(
         testResult: TestResultCommon,
         beforeFinish: MutableList<AutoTestStepApiResult>?,
@@ -218,8 +232,6 @@ class HttpWriter(
         if (autotest != null) {
             val autoTestUpdateApiModel = when {
                 beforeFinish != null && afterFinish != null -> {
-                    beforeFinish.addAll(autotest.setup ?: emptyList())
-                    afterFinish.addAll(0, autotest.teardown ?: emptyList())
                     Converter.autoTestModelToAutoTestUpdateApiModel(
                         autotest, beforeFinish, afterFinish, autotest.isFlaky)
                 }
