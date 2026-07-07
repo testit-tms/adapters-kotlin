@@ -72,7 +72,16 @@ class Converter {
             val model = TestResultUpdateV2Request(
                 duration = result.durationInMs,
                 statusCode = result.status!!.code,
-                links = result.links,
+                links = result.links?.stream()?.map { link: LinkApiResult ->
+                    val model = CreateLinkApiModel(
+                        url = link.url,
+                        title = link.title,
+                        description = link.description,
+                        type = link.type,
+                        hasInfo = link.hasInfo,
+                    )
+                    model
+                }?.collect(Collectors.toList()),
                 stepResults = result.stepResults,
                 failureClassIds = result.failureClassIds,
                 comment = result.comment,
@@ -100,7 +109,16 @@ class Converter {
                 failureClassIds = existing.failureClassIds,
                 statusCode = testResult.itemStatus?.value,
                 statusType = mapStatusType(testResult.itemStatus?.value ?: ""),
-                links = existing.links,
+                links = existing.links?.stream()?.map { link: LinkApiResult ->
+                    val model = CreateLinkApiModel(
+                        url = link.url,
+                        title = link.title,
+                        description = link.description,
+                        type = link.type,
+                        hasInfo = link.hasInfo,
+                    )
+                    model
+                }?.collect(Collectors.toList()),
                 stepResults = existing.stepResults,
                 attachments = when {
                     testResult.attachments.isNotEmpty() ->
@@ -515,6 +533,7 @@ class Converter {
                         url = link.url,
                         title = link.title,
                         description = link.description,
+                        type = link.type,
                         hasInfo = link.hasInfo,
                     )
                     model

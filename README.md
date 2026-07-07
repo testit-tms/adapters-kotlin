@@ -12,6 +12,7 @@ The repository contains new versions of adaptors for Kotlin test frameworks.
 | 5.5     | 0.7.1-TMS-5.5 |
 | 5.6     | 0.8.0-TMS-5.6 |
 | 5.7     | 1.0.1-TMS-5.7 |
+| 5.8     | 1.2.0-TMS-5.8 |
 | Cloud   | 0.9.0 +       |
 
 1. For current versions, see the releases tab. 
