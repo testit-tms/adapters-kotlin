@@ -1,15 +1,14 @@
 package ru.testit.clients
 
-import org.slf4j.LoggerFactory
 import kotlinx.serialization.Contextual
-import ru.testit.kotlin.client.apis.AttachmentsApi
-import ru.testit.kotlin.client.apis.AutoTestsApi
-import ru.testit.kotlin.client.apis.TestResultsApi
-import ru.testit.kotlin.client.apis.TestRunsApi
-import ru.testit.kotlin.client.infrastructure.ApiClient
-import kotlinx.serialization.Serializable
+import org.slf4j.LoggerFactory
 import ru.testit.clients.Converter.Companion.toModel
-import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.adaptersapi.apis.AttachmentsApi
+import ru.testit.kotlin.adaptersapi.apis.AutoTestsApi
+import ru.testit.kotlin.adaptersapi.apis.TestResultsApi
+import ru.testit.kotlin.adaptersapi.apis.TestRunsApi
+import ru.testit.kotlin.adaptersapi.infrastructure.ApiClient
+import ru.testit.kotlin.adaptersapi.models.*
 import ru.testit.utils.HtmlEscapeUtils
 import java.io.File
 import java.time.Duration
@@ -25,7 +24,6 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         private const val INCLUDE_LABELS = true
         private const val INCLUDE_LINKS = true
         private const val MAX_TRIES = 10
-        private const val WAITING_TIME = 100
     }
 
     @Contextual
@@ -38,8 +36,6 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     private val testResultsApi: TestResultsApi
 
     init {
-//        val apiClient = ApiClient(clientConfiguration.url)
-
         testRunsApi = TestRunsApi(clientConfiguration.url)
         init(testRunsApi)
         autoTestsApi = AutoTestsApi(clientConfiguration.url)
@@ -50,22 +46,22 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         init(testResultsApi)
     }
 
-    fun init(client: ApiClient ) {
+    fun init(client: ApiClient) {
         client.apiKeyPrefix["Authorization"] = AUTH_PREFIX
         client.apiKey["Authorization"] = clientConfiguration.privateToken
         client.verifyingSsl = clientConfiguration.certValidation
     }
 
-    override fun createTestRun(): TestRunV2ApiResult {
+    override fun createTestRun(): TestRunApiResult {
         val model = CreateEmptyTestRunApiModel(
             projectId = UUID.fromString(clientConfiguration.projectId),
             name = if (clientConfiguration.testRunName != "null") clientConfiguration.testRunName else null
         )
 
-        LOGGER.debug("Create new test run: {}", model);
+        LOGGER.debug("Create new test run: {}", model)
 
-        var response = testRunsApi.createEmpty(model)
-        testRunsApi.startTestRun(response.id).also { run ->
+        val response = testRunsApi.adaptersTestRunsPost(model)
+        testRunsApi.adaptersTestRunsIdStartPost(response.id).also {
             LOGGER.debug("The test run created: {}", response)
         }
 
@@ -73,28 +69,28 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     override fun updateTestRun() {
-        LOGGER.debug("Update test run: {}", clientConfiguration.testRunId);
+        LOGGER.debug("Update test run: {}", clientConfiguration.testRunId)
 
         if (clientConfiguration.testRunName == "null") {
-            return;
+            return
         }
 
         val testRun = this.getTestRun(clientConfiguration.testRunId)
 
         if (testRun.name == clientConfiguration.testRunName) {
-            return;
+            return
         }
 
         val model = testRun.toModel(clientConfiguration.testRunName)
 
-        testRunsApi.updateEmpty(model)
+        testRunsApi.adaptersTestRunsPut(model)
 
         LOGGER.debug("The test run updated")
     }
 
     override fun getWorkItemsLinkedToTest(testId: String): List<AutoTestWorkItemIdentifierApiResult> {
         try {
-            return autoTestsApi.getWorkItemsLinkedToAutoTest(testId, false, false)
+            return autoTestsApi.adaptersAutoTestsIdWorkItemsGet(testId, false, false)
         } catch (e: Exception) {
             LOGGER.error("Failed to retrieve work items linked to test $testId", e)
             throw e
@@ -106,11 +102,13 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         models: List<AutoTestResultsForTestRunModel>
     ): List<String> {
         try {
-            // Escape HTML in test results before sending
             val escapedModels = models.map { model ->
                 HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
             }
-            return testRunsApi.setAutoTestResultsForTestRun(UUID.fromString(testRunUuid), escapedModels).map { it.toString() }
+            return testRunsApi.adaptersTestRunsIdTestResultsPost(
+                UUID.fromString(testRunUuid),
+                escapedModels
+            ).map { it.toString() }
         } catch (e: Exception) {
             LOGGER.error("Failed to send test results for test run $testRunUuid", e)
             throw e
@@ -120,8 +118,8 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     override fun addAttachment(path: String): String {
         val file = File(path)
         try {
-            var model = attachmentsApi.apiV2AttachmentsPost(file);
-            return model.id.toString();
+            val model = attachmentsApi.adaptersAttachmentsPost(file)
+            return model.id.toString()
         } catch (e: Exception) {
             LOGGER.error("Failed to upload attachment from path $path", e)
             throw e
@@ -135,7 +133,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
             for (attempts in 0 until MAX_TRIES) {
                 try {
-                    autoTestsApi.linkAutoTestToWorkItem(id, WorkItemIdApiModel(workItemId))
+                    autoTestsApi.adaptersAutoTestsIdWorkItemsPost(id, WorkItemIdApiModel(workItemId))
                     LOGGER.debug("Link autotest {} to workitem {} is successfully", id, workItemId)
                     break
                 } catch (e: Exception) {
@@ -151,13 +149,18 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
             }
         }
     }
-    override fun getTestFromTestRun(testRunUuid: String, configurationId: String): List<String> {
-        val model = testRunsApi.getTestRunById(UUID.fromString(testRunUuid))
-        val configUUID = UUID.fromString(configurationId)
 
-        return if (model.testResults.isNullOrEmpty()) emptyList() else
-            model.testResults!!.filter { it.configurationId == configUUID }
-                .mapNotNull { it.autoTest?.externalId }.toList()
+    private fun searchTestResultsInRun(testRunUuid: String, configurationId: String): List<TestResultShortResponse> {
+        val filter = TestResultsFilterApiModel(
+            testRunIds = listOf(UUID.fromString(testRunUuid)),
+            configurationIds = listOf(UUID.fromString(configurationId)),
+        )
+        return testResultsApi.adaptersTestResultsSearchPost(testResultsFilterApiModel = filter)
+    }
+
+    override fun getTestFromTestRun(testRunUuid: String, configurationId: String): List<String> {
+        return searchTestResultsInRun(testRunUuid, configurationId)
+            .mapNotNull { it.autotestExternalId }
     }
 
     override fun getTestResultIdByExternalId(
@@ -165,27 +168,24 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         configurationId: String,
         externalId: String,
     ): UUID? {
-        val model = testRunsApi.getTestRunById(UUID.fromString(testRunUuid))
-        val configUUID = UUID.fromString(configurationId)
-        return model.testResults
-            ?.firstOrNull { it.configurationId == configUUID && it.autoTest?.externalId == externalId }
+        return searchTestResultsInRun(testRunUuid, configurationId)
+            .firstOrNull { it.autotestExternalId == externalId }
             ?.id
     }
 
-    override fun getTestResult(uuid: UUID): TestResultResponse  {
-        return testResultsApi.apiV2TestResultsIdGet(uuid)
+    override fun getTestResult(uuid: UUID): TestResultResponse {
+        return testResultsApi.adaptersTestResultsIdGet(uuid)
     }
 
-    override fun updateTestResult(uuid: UUID, model: TestResultUpdateV2Request ) {
-        // Escape HTML in test result update before sending
+    override fun updateTestResult(uuid: UUID, model: TestResultUpdateRequest) {
         val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
-        testResultsApi.apiV2TestResultsIdPut(uuid, escapedModel)
+        testResultsApi.adaptersTestResultsIdPut(uuid, escapedModel)
     }
 
     override fun unlinkAutoTestToWorkItem(testId: String, workItemId: String): Boolean {
         for (i in 1..MAX_TRIES) {
             try {
-                autoTestsApi.deleteAutoTestLinkFromWorkItem(testId, workItemId)
+                autoTestsApi.adaptersAutoTestsIdWorkItemsDelete(testId, workItemId)
                 LOGGER.debug("Unlinked autotest $testId from workitem $workItemId")
                 return true
             } catch (e: Exception) {
@@ -203,27 +203,25 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     @Synchronized
-    override fun getTestRun(uuid: String): TestRunV2ApiResult {
-        return testRunsApi.getTestRunById(UUID.fromString(uuid))
+    override fun getTestRun(uuid: String): TestRunApiResult {
+        return testRunsApi.adaptersTestRunsIdGet(UUID.fromString(uuid))
     }
 
     @Synchronized
     override fun completeTestRun(uuid: String) {
-        testRunsApi.completeTestRun(UUID.fromString(uuid))
+        testRunsApi.adaptersTestRunsIdCompletePost(UUID.fromString(uuid))
     }
 
     @Synchronized
     override fun updateAutoTest(model: AutoTestUpdateApiModel) {
-        // Escape HTML in autotest update before sending
         val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
-        autoTestsApi.updateAutoTest(escapedModel)
+        autoTestsApi.adaptersAutoTestsPut(escapedModel)
     }
 
     @Synchronized
     override fun createAutoTest(model: AutoTestCreateApiModel): String {
-        // Escape HTML in autotest creation before sending
         val escapedModel = HtmlEscapeUtils.escapeHtmlInObject(model) ?: model
-        return requireNotNull(autoTestsApi.createAutoTest(escapedModel).id.toString())
+        return requireNotNull(autoTestsApi.adaptersAutoTestsPost(escapedModel).id.toString())
     }
 
     @Synchronized
@@ -240,8 +238,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
         val model = AutoTestSearchApiModel(filter, includes)
 
-
-        val tests = autoTestsApi.apiV2AutoTestsSearchPost(null, null, null, null, null, model)
+        val tests = autoTestsApi.adaptersAutoTestsSearchPost(autoTestSearchApiModel = model)
 
         if (tests.isEmpty()) {
             return null

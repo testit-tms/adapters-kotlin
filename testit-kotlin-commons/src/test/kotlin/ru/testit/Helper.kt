@@ -1,6 +1,6 @@
 package ru.testit
 
-import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.adaptersapi.models.*
 import ru.testit.models.*
 import ru.testit.models.Label
 import ru.testit.models.LinkType
@@ -88,12 +88,8 @@ class Helper {
         fun generateAutoTestApiResult(projectId: String): AutoTestApiResult {
             val model = AutoTestApiResult(
                 globalId = 12345L,
-                isDeleted = false,
-                mustBeApproved = false,
+                isFlaky = false,
                 id = UUID.fromString(TEST_UUID),
-                createdDate = OffsetDateTime.now(),
-                createdById = UUID.randomUUID(),
-                externalId = EXTERNAL_ID,
                 projectId = UUID.fromString(projectId),
                 name = NAME,
                 links = generateLinkApiResults(),
@@ -103,7 +99,7 @@ class Helper {
                 title = TITLE,
                 description = DESCRIPTION,
                 labels = generateLabelApiResults(),
-                isFlaky = false,
+                externalId = EXTERNAL_ID,
             )
             return model
         }
@@ -299,7 +295,8 @@ class Helper {
             val labels = mutableListOf<LabelApiModel>()
 
             val label = LabelApiModel(
-                name = LABEL_NAME
+                name = LABEL_NAME,
+                globalId = 0L,
             )
             labels.add(label)
 
@@ -311,10 +308,9 @@ class Helper {
 
             val link = LinkUpdateApiModel(
                 title = LINK_TITLE,
-                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
-                type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
+                type = ru.testit.kotlin.adaptersapi.models.LinkType.valueOf(LINK_TYPE.value)
             )
 
             links.add(link)
@@ -327,10 +323,9 @@ class Helper {
 
             val link = LinkApiResult(
                 title = LINK_TITLE,
-                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
-                type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
+                type = ru.testit.kotlin.adaptersapi.models.LinkType.valueOf(LINK_TYPE.value)
             )
 
             links.add(link)
@@ -343,10 +338,9 @@ class Helper {
 
             val link = LinkCreateApiModel(
                 title = LINK_TITLE,
-                hasInfo = false,
                 description = LINK_DESCRIPTION,
                 url = LINK_URL,
-                type = ru.testit.kotlin.client.models.LinkType.valueOf(LINK_TYPE.value)
+                type = ru.testit.kotlin.adaptersapi.models.LinkType.valueOf(LINK_TYPE.value)
             )
 
             links.add(link)

@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory
 import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
 import ru.testit.clients.Converter
-import ru.testit.kotlin.client.infrastructure.ClientException
-import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.adaptersapi.infrastructure.ClientException
+import ru.testit.kotlin.adaptersapi.models.*
 import ru.testit.models.ClassContainer
 import ru.testit.models.ItemStatus
 import ru.testit.models.MainContainer
@@ -200,7 +200,6 @@ class HttpWriter(
     private fun isInProgressInTms(testResultId: UUID): Boolean {
         val status = apiClient.getTestResult(testResultId).status ?: return false
         return status.code.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
-            || status.name.equals(ItemStatus.INPROGRESS.value, ignoreCase = true)
     }
 
     private fun buildAutoTestFixtures(
