@@ -1,7 +1,7 @@
 package ru.testit.clients
 
-import ru.testit.kotlin.client.models.*
-import ru.testit.kotlin.client.models.LinkType
+import ru.testit.kotlin.adaptersapi.models.*
+import ru.testit.kotlin.adaptersapi.models.LinkType
 import ru.testit.models.*
 import ru.testit.models.Label
 import ru.testit.models.LinkItem
@@ -68,11 +68,11 @@ class Converter {
         fun testResultToTestResultUpdateModel(result: TestResultResponse,
                                               setupResults: List<AutoTestStepResultUpdateRequest>?,
                                               teardownResults: List<AutoTestStepResultUpdateRequest>?
-        ): TestResultUpdateV2Request {
-            val model = TestResultUpdateV2Request(
+        ): TestResultUpdateRequest {
+            val model = TestResultUpdateRequest(
                 duration = result.durationInMs,
                 statusCode = result.status!!.code,
-                links = result.links,
+                links = convertLinksFromResult(result.links),
                 stepResults = result.stepResults,
                 failureClassIds = result.failureClassIds,
                 comment = result.comment,
@@ -89,18 +89,18 @@ class Converter {
             existing: TestResultResponse,
             setupResults: List<AutoTestStepResultUpdateRequest>?,
             teardownResults: List<AutoTestStepResultUpdateRequest>?,
-        ): TestResultUpdateV2Request {
+        ): TestResultUpdateRequest {
             val throwable = testResult.throwable
             val duration = if (testResult.start != null && testResult.stop != null) {
                 testResult.stop!! - testResult.start!!
             } else {
                 existing.durationInMs
             }
-            return TestResultUpdateV2Request(
+            return TestResultUpdateRequest(
                 failureClassIds = existing.failureClassIds,
                 statusCode = testResult.itemStatus?.value,
                 statusType = mapStatusType(testResult.itemStatus?.value ?: ""),
-                links = existing.links,
+                links = convertLinksFromResult(existing.links),
                 stepResults = existing.stepResults,
                 attachments = when {
                     testResult.attachments.isNotEmpty() ->
@@ -179,7 +179,7 @@ class Converter {
                 teardown = teardown.toApiModels() ?: autoTestModel.teardown.toApiModels(),
                 title = autoTestModel.title,
                 description = autoTestModel.description,
-                labels = labelsConvert(autoTestModel.labels!!),
+                labels = labelsConvert(autoTestModel.labels ?: emptyList()),
                 tags = autoTestModel.tags,
                 isFlaky = isFlaky,
 
@@ -240,7 +240,6 @@ class Converter {
             links.map {
                 val model = LinkCreateApiModel(
                     url = it.url,
-                    hasInfo = false,
                     title = it.title,
                     description = it.description,
                     type = LinkType.valueOf(it.type.value)
@@ -264,7 +263,6 @@ class Converter {
             links.map {
                 val model = LinkUpdateApiModel(
                     url = it.url,
-                    hasInfo = false,
                     title = it.title,
                     description = it.description,
                     type = LinkType.valueOf(it.type.value)
@@ -330,10 +328,10 @@ class Converter {
         }
 
         private fun labelsConvert(labels: List<LabelApiResult>): List<LabelApiModel> =
-            labels.map { LabelApiModel(name = it.name) }
+            labels.map { LabelApiModel(name = it.name, globalId = it.globalId) }
 
         private fun labelsPostConvert(labels: List<Label>): List<LabelApiModel> =
-            labels.map { LabelApiModel(name = it.name!!) }
+            labels.map { LabelApiModel(name = it.name!!, globalId = 0L) }
 
         private fun dateToOffsetDateTime(time: Long): OffsetDateTime {
             val date = Date(time)
@@ -346,67 +344,18 @@ class Converter {
         private fun convertAttachmentsFromResult(models: List<AttachmentApiResult>): List<AttachmentUpdateRequest> =
             models.map { AttachmentUpdateRequest(id = it.id) }
 
-        fun AutoTestApiResult?.toModel(): AutoTestModel? {
-            if (this?.externalId == null) {
-                return null;
+        private fun convertLinksFromResult(links: List<LinkApiResult>?): List<CreateLinkApiModel>? {
+            if (links.isNullOrEmpty()) {
+                return null
             }
-
-            val model = AutoTestModel(
-                id = this.id,
-                externalId = this.externalId!!,
-                links = this.links.toPutModels(),
-                projectId = this.projectId,
-                name = this.name,
-                namespace = this.namespace,
-                classname = this.classname,
-                steps = this.steps.toStepModels(),
-                setup = this.setup.toStepModels(),
-                teardown = this.teardown.toStepModels(),
-                title = this.title,
-                description = this.description,
-                labels = this.labels.toPutModels(),
-                externalKey = this.externalKey,
-                globalId = this.globalId,
-                isDeleted = this.isDeleted,
-                mustBeApproved = this.mustBeApproved,
-                createdDate = this.createdDate,
-                createdById = this.createdById,
-                lastTestResultStatus = if (this.lastTestResultStatus != null)
-                    this.lastTestResultStatus!!.toModel() else null
-            )
-
-            return model;
-        }
-
-        private fun TestStatusApiResult.toModel(): TestStatusModel {
-            return TestStatusModel(
-                id = this.id,
-                name = this.name,
-                type = this.type.toModel(),
-                isSystem = this.isSystem,
-                code = this.code,
-                description = this.description
-            )
-        }
-
-        private fun TestStatusApiType.toModel(): TestStatusType {
-            return TestStatusType.valueOf(this.value)
-        }
-
-        @JvmName("autoTestStepApiResultToModels")
-        private fun List<AutoTestStepApiResult>?.toStepModels(): List<AutoTestStepModel>? {
-            if (this == null) {
-                return ArrayList()
-            }
-
-            return this.stream().map { step: AutoTestStepApiResult ->
-                val model = AutoTestStepModel(
-                    title = step.title,
-                    description = step.description,
-                    steps = step.steps.toStepModels(),
+            return links.map { link ->
+                CreateLinkApiModel(
+                    url = link.url,
+                    type = link.type,
+                    title = link.title,
+                    description = link.description,
                 )
-                model
-            }.collect(Collectors.toList())
+            }
         }
 
         @JvmName("autoTestStepApiResultToStepApiModels")
@@ -426,44 +375,6 @@ class Converter {
         }
 
 
-        @JvmName("linkApiResultToUpdateModels")
-        private fun List<LinkApiResult>?.toUpdateModels(): List<LinkUpdateApiModel> {
-            if (this == null) {
-                return ArrayList()
-            }
-
-            return this.stream().map { link: LinkApiResult ->
-                val model = LinkUpdateApiModel(
-                    url = link.url,
-                    hasInfo = false,
-                    title = link.title,
-                    description = link.description,
-                    type = link.type?.let { LinkType.valueOf(it.value) }
-                        ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
-                )
-                model
-            }.collect(Collectors.toList())
-        }
-
-        @JvmName("linkApiResultToPutModels")
-        private fun List<LinkApiResult>?.toPutModels(): List<LinkPutModel> {
-            if (this == null) {
-                return ArrayList()
-            }
-
-            return this.stream().map { link: LinkApiResult ->
-                val model = LinkPutModel(
-                    url = link.url,
-                    hasInfo = false,
-                    title = link.title,
-                    description = link.description,
-                    type = link.type?.let { LinkType.valueOf(it.value) }
-                        ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
-                )
-                model
-            }.collect(Collectors.toList())
-        }
-
         @JvmName("linkApiResultToUpdateApiModels")
         private fun List<LinkApiResult>?.toUpdateApiModels(): List<LinkUpdateApiModel> {
             if (this == null) {
@@ -473,10 +384,10 @@ class Converter {
             return this.stream().map { link: LinkApiResult ->
                 val model = LinkUpdateApiModel(
                     url = link.url,
-                    hasInfo = false,
+                    id = link.id,
                     title = link.title,
                     description = link.description,
-                    type = link.type?.let { LinkType.valueOf(it.value) }
+                    type = link.type
                         ?: LinkType.valueOf(ru.testit.models.LinkType.RELATED.value)
                 )
                 model
@@ -499,25 +410,23 @@ class Converter {
             }.collect(Collectors.toList())
         }
 
-        public fun TestRunV2ApiResult.toModel(name: String): UpdateEmptyTestRunApiModel {
+        public fun TestRunApiResult.toModel(name: String): UpdateEmptyTestRunApiModel {
             return UpdateEmptyTestRunApiModel(
                 id = this.id,
                 name = name,
-                description = this.description,
-                launchSource = this.launchSource,
+                description = null,
+                launchSource = null,
                 attachments = this.attachments.stream().map { attachment: AttachmentApiResult ->
-                    val model = AssignAttachmentApiModel(id = attachment.id)
-                    model
+                    AssignAttachmentApiModel(id = attachment.id)
                 }.collect(Collectors.toList()),
                 links = this.links.stream().map { link: LinkApiResult ->
-                    val model = UpdateLinkApiModel(
+                    UpdateLinkApiModel(
                         id = link.id,
                         url = link.url,
                         title = link.title,
                         description = link.description,
-                        hasInfo = link.hasInfo,
+                        type = link.type,
                     )
-                    model
                 }.collect(Collectors.toList()),
             )
         }

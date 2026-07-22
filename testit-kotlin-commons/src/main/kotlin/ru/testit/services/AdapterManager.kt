@@ -6,7 +6,7 @@ import ru.testit.clients.ApiClient
 import ru.testit.clients.ClientConfiguration
 import ru.testit.clients.Converter.Companion.mapStatusType
 import ru.testit.clients.TmsApiClient
-import ru.testit.kotlin.client.models.TestRunState
+import ru.testit.kotlin.adaptersapi.models.TestRunState
 import ru.testit.listener.AdapterListener
 import ru.testit.listener.ListenerManager
 import ru.testit.listener.ServiceLoaderListener

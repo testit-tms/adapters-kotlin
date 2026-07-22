@@ -1,15 +1,15 @@
 package ru.testit.clients
 
-import ru.testit.kotlin.client.infrastructure.ClientException
-import ru.testit.kotlin.client.infrastructure.ServerException
-import ru.testit.kotlin.client.models.*
+import ru.testit.kotlin.adaptersapi.infrastructure.ClientException
+import ru.testit.kotlin.adaptersapi.infrastructure.ServerException
+import ru.testit.kotlin.adaptersapi.models.*
 import java.io.IOException
 import java.util.UUID
 
 interface ApiClient {
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun createTestRun(): TestRunV2ApiResult
+    fun createTestRun(): TestRunApiResult
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
@@ -17,7 +17,7 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun getTestRun(uuid: String): TestRunV2ApiResult
+    fun getTestRun(uuid: String): TestRunApiResult
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
@@ -69,5 +69,5 @@ interface ApiClient {
 
     @Throws(IllegalStateException::class, IOException::class,
         UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun updateTestResult(uuid: UUID, model: TestResultUpdateV2Request )
+    fun updateTestResult(uuid: UUID, model: TestResultUpdateRequest)
 }
