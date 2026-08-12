@@ -21,6 +21,8 @@ val CERT_VALIDATION = "certValidation"
 val TMS_INTEGRATION = "testIt"
 val SYNC_STORAGE_PORT = "syncStoragePort"
 val IMPORT_REALTIME = "importRealtime"
+val TEST_RUN_TAGS = "testRunTags"
+val TEST_RUN_LINKS = "testRunLinks"
 
 val PROPERTIES_FILE = "testit.properties"
 
@@ -40,7 +42,9 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         CERT_VALIDATION to "TMS_CERT_VALIDATION",
         TMS_INTEGRATION to "TMS_TEST_IT",
         SYNC_STORAGE_PORT to "TMS_SYNC_STORAGE_PORT",
-        IMPORT_REALTIME to "TMS_IMPORT_REALTIME"
+        IMPORT_REALTIME to "TMS_IMPORT_REALTIME",
+        TEST_RUN_TAGS to "TMS_TEST_RUN_TAGS",
+        TEST_RUN_LINKS to "TMS_TEST_RUN_LINKS"
     ),
     "cli" to mapOf(
         URL to "tmsUrl",
@@ -55,7 +59,9 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         CERT_VALIDATION to "tmsCertValidation",
         TMS_INTEGRATION to "tmsTestIt",
         SYNC_STORAGE_PORT to "tmsSyncStoragePort",
-        IMPORT_REALTIME to "tmsImportRealtime"
+        IMPORT_REALTIME to "tmsImportRealtime",
+        TEST_RUN_TAGS to "tmsTestRunTags",
+        TEST_RUN_LINKS to "tmsTestRunLinks"
     )
 )
 
@@ -189,6 +195,16 @@ private val envVarsNames: Map<String, Map<String, String>> = mapOf(
         val importRealtime = properties.getProperty(varNames[IMPORT_REALTIME])
         if (importRealtime == "false" || importRealtime == "true") {
             result[IMPORT_REALTIME] = importRealtime
+        }
+
+        val testRunTags = properties.getProperty(varNames[TEST_RUN_TAGS])
+        if (!testRunTags.isNullOrBlank() && !testRunTags.equals("null", ignoreCase = true)) {
+            result[TEST_RUN_TAGS] = testRunTags
+        }
+
+        val testRunLinks = properties.getProperty(varNames[TEST_RUN_LINKS])
+        if (!testRunLinks.isNullOrBlank() && !testRunLinks.equals("null", ignoreCase = true)) {
+            result[TEST_RUN_LINKS] = testRunLinks
         }
 
         return result
