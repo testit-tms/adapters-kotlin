@@ -32,6 +32,11 @@ Supported test frameworks :
 - Added `importRealtime` flag: real-time upload (default) or deferred batch upload at suite end. See [docs/import-realtime.md](docs/import-realtime.md).
 - `LinkType` for links defaults to `Related` when not specified.
 
+## What's new in 2.0.0?
+
+- Test run tags and links: `testRunTags` / `TMS_TEST_RUN_TAGS`, `testRunLinks` / `TMS_TEST_RUN_LINKS`. Applied on create and merged early into an existing run. See [docs/test-run-tags-links.md](docs/test-run-tags-links.md).
+- Documented test run link types: `Related`, `BlockedBy`, `Defect`, `Issue`, `Requirement`, `Repository`.
+
 ### How to run 1.0+ locally?
 
 You can change nothing, it's full compatible with previous versions of adapters for local run on all OS.

@@ -428,6 +428,7 @@ class Converter {
                         type = link.type,
                     )
                 }.collect(Collectors.toList()),
+                tags = this.tags,
             )
         }
     }
