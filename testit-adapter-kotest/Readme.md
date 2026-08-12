@@ -44,6 +44,8 @@ implementation "ru.testit:testit-adapter-kotest:0.1.1"
 | Mode of automatic updation links to test cases (**It's optional**). Default value - false. The adapter supports following modes:<br/>true - in this mode, the adapter will update links to test cases<br/>false - in this mode, the adapter will not update link to test cases                                      | automaticUpdationLinksToTestCases | TMS_AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES | tmsAutomaticUpdationLinksToTestCases |
 | Real-time test result upload (**It's optional**). Default value - true. See [import-realtime spec](../../docs/import-realtime.md):<br/>true - each test result is sent to TMS immediately (first test via Sync Storage as InProgress)<br/>false - results are buffered and sent in batch at suite end with fixtures | importRealtime                    | TMS_IMPORT_REALTIME                        | tmsImportRealtime                    |
 | Sync Storage port (**It's optional**). Default value - 49152                                                                                                                                                                                                                                                        | syncStoragePort                   | TMS_SYNC_STORAGE_PORT                      | tmsSyncStoragePort                   |
+| Test run tags (**It's optional**). Comma-separated or JSON array. Applied on create or merged early into an existing run. See [test-run-tags-links](../../docs/test-run-tags-links.md)                                                                                                                             | testRunTags                       | TMS_TEST_RUN_TAGS                          | tmsTestRunTags                       |
+| Test run links (**It's optional**). JSON array of `{url, title?, description?, type?}`. Types: Related, BlockedBy, Defect, Issue, Requirement, Repository. See [test-run-tags-links](../../docs/test-run-tags-links.md)                                                                                           | testRunLinks                      | TMS_TEST_RUN_LINKS                         | tmsTestRunLinks                      |
 | Name of the configuration file If it is not provided, it is used default file name (**It's optional**)                                                                                                                                                                                                              | -                                 | TMS_CONFIG_FILE                            | tmsConfigFile                        |
 
 #### File
@@ -63,6 +65,8 @@ certValidation=CERT_VALIDATION
 testIt=TEST_IT
 importRealtime=IMPORT_REALTIME
 syncStoragePort=SYNC_STORAGE_PORT
+testRunTags=smoke,nightly
+testRunLinks=[{"url":"https://ci.example/job/1","title":"CI Job","type":"Related"}]
 ```
 
 

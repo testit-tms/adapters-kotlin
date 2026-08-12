@@ -2,13 +2,13 @@ package ru.testit.clients
 
 import kotlinx.serialization.Contextual
 import org.slf4j.LoggerFactory
-import ru.testit.clients.Converter.Companion.toModel
 import ru.testit.kotlin.adaptersapi.apis.AttachmentsApi
 import ru.testit.kotlin.adaptersapi.apis.AutoTestsApi
 import ru.testit.kotlin.adaptersapi.apis.TestResultsApi
 import ru.testit.kotlin.adaptersapi.apis.TestRunsApi
 import ru.testit.kotlin.adaptersapi.infrastructure.ApiClient
 import ru.testit.kotlin.adaptersapi.models.*
+import ru.testit.properties.TestRunMetadataParser
 import ru.testit.utils.HtmlEscapeUtils
 import java.io.File
 import java.time.Duration
@@ -53,12 +53,25 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     }
 
     override fun createTestRun(): TestRunApiResult {
+        val tags = clientConfiguration.testRunTags.takeIf { it.isNotEmpty() }
+        val links = TestRunMetadataParser.toCreateLinkModels(clientConfiguration.testRunLinks)
+            .takeIf { it.isNotEmpty() }
+
         val model = CreateEmptyTestRunApiModel(
             projectId = UUID.fromString(clientConfiguration.projectId),
-            name = if (clientConfiguration.testRunName != "null") clientConfiguration.testRunName else null
+            name = if (clientConfiguration.testRunName != "null") clientConfiguration.testRunName else null,
+            tags = tags,
+            links = links,
         )
 
         LOGGER.debug("Create new test run: {}", model)
+        if (tags != null || links != null) {
+            LOGGER.info(
+                "Applying test run metadata on create: tags={}, links={}",
+                tags ?: emptyList<String>(),
+                links?.map { it.url } ?: emptyList<String>(),
+            )
+        }
 
         val response = testRunsApi.adaptersTestRunsPost(model)
         testRunsApi.adaptersTestRunsIdStartPost(response.id).also {
@@ -71,20 +84,51 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     override fun updateTestRun() {
         LOGGER.debug("Update test run: {}", clientConfiguration.testRunId)
 
-        if (clientConfiguration.testRunName == "null") {
+        val hasName = clientConfiguration.testRunName != "null"
+        val hasMetadata = clientConfiguration.hasTestRunMetadata()
+        if (!hasName && !hasMetadata) {
             return
         }
 
         val testRun = this.getTestRun(clientConfiguration.testRunId)
-
-        if (testRun.name == clientConfiguration.testRunName) {
+        val nameChanged = hasName && testRun.name != clientConfiguration.testRunName
+        if (!nameChanged && !hasMetadata) {
             return
         }
 
-        val model = testRun.toModel(clientConfiguration.testRunName)
+        val existingLinks = testRun.links.map { link ->
+            UpdateLinkApiModel(
+                id = link.id,
+                url = link.url,
+                title = link.title,
+                description = link.description,
+                type = link.type,
+            )
+        }
+        val configuredLinks = TestRunMetadataParser.toUpdateLinkModels(clientConfiguration.testRunLinks)
+        val mergedTags = TestRunMetadataParser.mergeTags(testRun.tags, clientConfiguration.testRunTags)
+        val mergedLinks = TestRunMetadataParser.mergeUpdateLinks(existingLinks, configuredLinks)
+
+        val model = UpdateEmptyTestRunApiModel(
+            id = testRun.id,
+            name = if (nameChanged) clientConfiguration.testRunName else testRun.name,
+            description = null,
+            launchSource = null,
+            attachments = testRun.attachments.map { AssignAttachmentApiModel(id = it.id) },
+            links = mergedLinks,
+            tags = mergedTags,
+        )
 
         testRunsApi.adaptersTestRunsPut(model)
 
+        if (hasMetadata) {
+            LOGGER.info(
+                "Merged test run metadata for {}: tags={}, links={}",
+                clientConfiguration.testRunId,
+                mergedTags,
+                mergedLinks.map { it.url },
+            )
+        }
         LOGGER.debug("The test run updated")
     }
 

@@ -1,7 +1,9 @@
 package ru.testit.clients
 
 import kotlinx.serialization.Serializable
+import ru.testit.models.TestRunLinkConfig
 import ru.testit.properties.AppProperties
+import ru.testit.properties.TestRunMetadataParser
 import ru.testit.services.Utils
 
 import java.util.*
@@ -15,7 +17,9 @@ data class ClientConfiguration(
     var testRunId: String,
     val testRunName: String,
     val certValidation: Boolean,
-    var automaticUpdationLinksToTestCases: Boolean
+    var automaticUpdationLinksToTestCases: Boolean,
+    val testRunTags: List<String> = emptyList(),
+    val testRunLinks: List<TestRunLinkConfig> = emptyList(),
 ) {
     constructor(properties: Properties) : this(
         privateToken_ = properties.getProperty(AppProperties.PRIVATE_TOKEN, "null"),
@@ -38,13 +42,16 @@ data class ClientConfiguration(
             properties.getProperty(AppProperties.AUTOMATIC_UPDATION_LINKS_TO_TEST_CASES).toString() == "true"
         } catch (e: NullPointerException) {
             false
-        }
+        },
+        testRunTags = TestRunMetadataParser.parseTags(properties.getProperty(AppProperties.TEST_RUN_TAGS)),
+        testRunLinks = TestRunMetadataParser.parseLinks(properties.getProperty(AppProperties.TEST_RUN_LINKS)),
     )
 
     val privateToken: String
         get() = privateToken_
 
-
+    fun hasTestRunMetadata(): Boolean =
+        testRunTags.isNotEmpty() || testRunLinks.isNotEmpty()
 
     override fun toString(): String {
         return "ClientConfiguration(" +
@@ -55,7 +62,9 @@ data class ClientConfiguration(
                 "testRunId='$testRunId', " +
                 "testRunName='$testRunName', " +
                 "certValidation=$certValidation, " +
-                "automaticUpdationLinksToTestCases=$automaticUpdationLinksToTestCases" +
+                "automaticUpdationLinksToTestCases=$automaticUpdationLinksToTestCases, " +
+                "testRunTags=$testRunTags, " +
+                "testRunLinks=$testRunLinks" +
                 ")"
     }
 }
