@@ -24,7 +24,7 @@ import com.squareup.moshi.JsonClass
 /**
  * 
  *
- * @param projectId Project unique identifier                This property is to link test run with a project
+ * @param projectId Project unique identifier              This property is to link test run with a project
  * @param name Test run name
  * @param description Test run description
  * @param launchSource Test run launch source
@@ -36,7 +36,7 @@ import com.squareup.moshi.JsonClass
 
 data class CreateEmptyTestRunApiModel (
 
-    /* Project unique identifier                This property is to link test run with a project */
+    /* Project unique identifier              This property is to link test run with a project */
     @Json(name = "projectId")
     val projectId: java.util.UUID,
 

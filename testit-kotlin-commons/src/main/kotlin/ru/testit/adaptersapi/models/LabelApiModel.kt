@@ -23,7 +23,6 @@ import com.squareup.moshi.JsonClass
  * 
  *
  * @param name Name of the label
- * @param globalId Global ID of the label
  */
 
 
@@ -31,11 +30,7 @@ data class LabelApiModel (
 
     /* Name of the label */
     @Json(name = "name")
-    val name: kotlin.String,
-
-    /* Global ID of the label */
-    @Json(name = "globalId")
-    val globalId: kotlin.Long
+    val name: kotlin.String
 
 ) {
 

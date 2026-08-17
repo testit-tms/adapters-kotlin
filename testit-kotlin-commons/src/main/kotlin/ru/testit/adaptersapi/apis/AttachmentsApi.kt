@@ -228,7 +228,7 @@ open class AttachmentsApi(basePath: kotlin.String = defaultBasePath, client: Cal
     /**
      * POST /adapters/attachments
      * Upload new attachment file
-     * File size is restricted to 1 GB (1 073 741 824 bytes)
+     * File size is restricted to 50 MB (52 428 800 bytes)
      * @param file  (optional)
      * @return AttachmentModel
      * @throws IllegalStateException If the request is not correctly configured
@@ -260,7 +260,7 @@ open class AttachmentsApi(basePath: kotlin.String = defaultBasePath, client: Cal
     /**
      * POST /adapters/attachments
      * Upload new attachment file
-     * File size is restricted to 1 GB (1 073 741 824 bytes)
+     * File size is restricted to 50 MB (52 428 800 bytes)
      * @param file  (optional)
      * @return ApiResponse<AttachmentModel?>
      * @throws IllegalStateException If the request is not correctly configured
