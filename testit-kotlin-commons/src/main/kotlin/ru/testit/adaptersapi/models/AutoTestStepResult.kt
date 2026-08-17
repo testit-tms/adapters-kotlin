@@ -32,7 +32,7 @@ import com.squareup.moshi.JsonClass
  * @param duration Expected or actual duration of the test run execution in milliseconds.
  * @param outcome Specifies the result of the autotest execution.
  * @param stepResults Nested step results. The maximum nesting level is 15.
- * @param attachments /// <summary>  Specifies an attachment GUID. Multiple values can be sent.  </summary>
+ * @param attachments /// <summary> Specifies an attachment GUID. Multiple values can be sent. </summary>
  * @param parameters \"<b>parameter</b>\": \"<b>value</b>\" pair with arbitrary custom parameters. Multiple parameters can be sent.
  */
 
@@ -71,7 +71,7 @@ data class AutoTestStepResult (
     @Json(name = "stepResults")
     val stepResults: kotlin.collections.List<AutoTestStepResult>? = null,
 
-    /* /// <summary>  Specifies an attachment GUID. Multiple values can be sent.  </summary> */
+    /* /// <summary> Specifies an attachment GUID. Multiple values can be sent. </summary> */
     @Json(name = "attachments")
     val attachments: kotlin.collections.List<AttachmentApiResult>? = null,
 
