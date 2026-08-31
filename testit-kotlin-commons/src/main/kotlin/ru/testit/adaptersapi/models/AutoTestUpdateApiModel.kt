@@ -17,6 +17,7 @@ package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.AutoTestStepApiModel
 import ru.testit.kotlin.adaptersapi.models.LabelApiModel
+import ru.testit.kotlin.adaptersapi.models.LayerApiModel
 import ru.testit.kotlin.adaptersapi.models.LinkUpdateApiModel
 
 import com.squareup.moshi.Json
@@ -28,6 +29,7 @@ import com.squareup.moshi.JsonClass
  * @param projectId Unique ID of the autotest project
  * @param externalId External ID of the autotest
  * @param name Name of the autotest
+ * @param resetLayer Indicates if the autotest layer should be reset.
  * @param id Autotest unique internal identifier
  * @param externalKey External key of the autotest
  * @param namespace Name of the autotest namespace
@@ -35,6 +37,7 @@ import com.squareup.moshi.JsonClass
  * @param title Name of the autotest in autotest's card
  * @param description Description of the autotest in autotest's card
  * @param isFlaky Indicates if the autotest is marked as flaky
+ * @param layer Layer of the autotest. Assigns layer by rules if omitted.
  * @param steps Collection of the autotest steps
  * @param setup Collection of the autotest setup steps
  * @param teardown Collection of the autotest teardown steps
@@ -57,6 +60,10 @@ data class AutoTestUpdateApiModel (
     /* Name of the autotest */
     @Json(name = "name")
     val name: kotlin.String,
+
+    /* Indicates if the autotest layer should be reset. */
+    @Json(name = "resetLayer")
+    val resetLayer: kotlin.Boolean,
 
     /* Autotest unique internal identifier */
     @Json(name = "id")
@@ -85,6 +92,10 @@ data class AutoTestUpdateApiModel (
     /* Indicates if the autotest is marked as flaky */
     @Json(name = "isFlaky")
     val isFlaky: kotlin.Boolean? = null,
+
+    /* Layer of the autotest. Assigns layer by rules if omitted. */
+    @Json(name = "layer")
+    val layer: LayerApiModel? = null,
 
     /* Collection of the autotest steps */
     @Json(name = "steps")

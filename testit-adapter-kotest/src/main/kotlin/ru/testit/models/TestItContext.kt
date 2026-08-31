@@ -15,4 +15,5 @@ data class TestItContext (
     var parameters: MutableMap<String, String>? = null,
     var labels: MutableList<Label>? = null,
     var tags: MutableList<String>? = null,
+    var layer: String? = null,
 )

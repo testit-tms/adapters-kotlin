@@ -32,6 +32,7 @@ class Converter {
                 steps = convertStepsToApiModel(result.getSteps()),
                 labels = labelsPostConvert(result.labels),
                 tags = result.tags,
+                layer = layerToApiModel(result.layer),
                 shouldCreateWorkItem = result.automaticCreationTestCases,
             )
             return model
@@ -58,8 +59,9 @@ class Converter {
                 tags = result.tags,
                 setup = ArrayList(),
                 teardown = ArrayList(),
-                isFlaky = isFlaky
-
+                isFlaky = isFlaky,
+                resetLayer = false,
+                layer = layerToApiModel(result.layer),
             )
             return model
         }
@@ -138,23 +140,25 @@ class Converter {
         }
 
         fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, null, null, null, null)
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, null, null, null, null, null)
         }
 
 
         fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult,
                                                   setup:  List<AutoTestStepApiResult>?,
                                                   teardown:  List<AutoTestStepApiResult>?,
-                                                  isFlaky: Boolean?): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, isFlaky, setup, teardown, null)
+                                                  isFlaky: Boolean?,
+                                                  layer: String? = null): AutoTestUpdateApiModel {
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, null, isFlaky, setup, teardown, null, layer)
         }
 
 
         fun autoTestModelToAutoTestUpdateApiModel(autoTestModel: AutoTestApiResult,
                                                   links: List<LinkUpdateApiModel>?,
                                                   isFlaky: Boolean?,
-                                                  externalKey: String?): AutoTestUpdateApiModel {
-            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, links, isFlaky, null, null, externalKey)
+                                                  externalKey: String?,
+                                                  layer: String? = null): AutoTestUpdateApiModel {
+            return autoTestModelToAutoTestUpdateApiModel(autoTestModel, links, isFlaky, null, null, externalKey, layer)
         }
 
         fun autoTestModelToAutoTestUpdateApiModel(
@@ -164,6 +168,7 @@ class Converter {
             setup: List<AutoTestStepApiResult>?,
             teardown: List<AutoTestStepApiResult>?,
             externalKey: String?,
+            layer: String? = null,
         ): AutoTestUpdateApiModel {
             val model = AutoTestUpdateApiModel(
                 id = autoTestModel.id,
@@ -182,8 +187,9 @@ class Converter {
                 labels = labelsConvert(autoTestModel.labels ?: emptyList()),
                 tags = autoTestModel.tags,
                 isFlaky = isFlaky,
-
-                )
+                resetLayer = false,
+                layer = layerToApiModel(layer),
+            )
             return model
         }
 
@@ -332,6 +338,13 @@ class Converter {
 
         private fun labelsPostConvert(labels: List<Label>): List<LabelApiModel> =
             labels.map { LabelApiModel(name = it.name!!) }
+
+        private fun layerToApiModel(layer: String?): LayerApiModel? {
+            if (layer.isNullOrBlank()) {
+                return null
+            }
+            return LayerApiModel(name = layer, source = LayerSource.Run)
+        }
 
         private fun dateToOffsetDateTime(time: Long): OffsetDateTime {
             val date = Date(time)

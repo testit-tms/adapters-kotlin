@@ -28,11 +28,14 @@ import com.squareup.moshi.JsonClass
  *
  * @param id Test run unique identifier
  * @param name Test run name
+ * @param projectId Project unique identifier              This property is used to link test run with project.
  * @param stateName Test run state
  * @param status Test run status
  * @param attachments Collection of attachments related to the test run
  * @param links Collection of links related to the test run
  * @param tags Collection of tags associated with the test run
+ * @param description Test run description
+ * @param launchSource Test run launch source              Once launch source is specified it cannot be updated.
  */
 
 
@@ -45,6 +48,10 @@ data class TestRunApiResult (
     /* Test run name */
     @Json(name = "name")
     val name: kotlin.String,
+
+    /* Project unique identifier              This property is used to link test run with project. */
+    @Json(name = "projectId")
+    val projectId: java.util.UUID,
 
     /* Test run state */
     @Json(name = "stateName")
@@ -65,7 +72,15 @@ data class TestRunApiResult (
 
     /* Collection of tags associated with the test run */
     @Json(name = "tags")
-    val tags: kotlin.collections.List<kotlin.String>
+    val tags: kotlin.collections.List<kotlin.String>,
+
+    /* Test run description */
+    @Json(name = "description")
+    val description: kotlin.String? = null,
+
+    /* Test run launch source              Once launch source is specified it cannot be updated. */
+    @Json(name = "launchSource")
+    val launchSource: kotlin.String? = null
 
 ) {
 

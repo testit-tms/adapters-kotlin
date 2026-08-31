@@ -46,6 +46,7 @@ object Consumers {
             result.title = context.title ?: result.title
             result.labels = context.labels ?: result.labels
             result.tags = context.tags ?: result.tags
+            result.layer = context.layer ?: result.layer
             result.message = context.message ?: result.message
             result.itemStatus = context.itemStatus ?: result.itemStatus
             result.attachments = context.attachments ?: result.attachments

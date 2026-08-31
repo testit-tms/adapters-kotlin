@@ -97,6 +97,7 @@ fun TestCase.setContext(value: TestItContext) {
         value.parameters = if (value.parameters != null) value.parameters else context.parameters
         value.labels = if (value.labels != null) value.labels else context.labels
         value.tags = if (value.tags != null) value.tags else context.tags
+        value.layer = if (value.layer != null) value.layer else context.layer
     }
     writer.context[this.name.toString()] = value
 }

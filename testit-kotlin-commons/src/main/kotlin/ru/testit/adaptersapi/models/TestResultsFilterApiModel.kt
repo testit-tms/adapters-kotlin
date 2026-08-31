@@ -15,6 +15,7 @@
 
 package ru.testit.kotlin.adaptersapi.models
 
+import ru.testit.kotlin.adaptersapi.models.FailureCategoryModel
 import ru.testit.kotlin.adaptersapi.models.Int64RangeSelectorModel
 import ru.testit.kotlin.adaptersapi.models.TestResultOutcome
 import ru.testit.kotlin.adaptersapi.models.TestStatusApiType
@@ -29,6 +30,7 @@ import com.squareup.moshi.JsonClass
  * @param outcomes Specifies a test result outcomes to search for
  * @param statusCodes Specifies a test result status codes to search for
  * @param statusTypes Specifies a test result status types to search for
+ * @param failureCategories Specifies a test result failure categories to search for
  * @param namespace Specifies a test result namespace to search for
  * @param className Specifies a test result class name to search for
  * @param autoTestGlobalIds Specifies an autotest global IDs to search results for
@@ -58,6 +60,10 @@ data class TestResultsFilterApiModel (
     /* Specifies a test result status types to search for */
     @Json(name = "statusTypes")
     val statusTypes: kotlin.collections.List<TestStatusApiType>? = null,
+
+    /* Specifies a test result failure categories to search for */
+    @Json(name = "failureCategories")
+    val failureCategories: kotlin.collections.List<FailureCategoryModel>? = null,
 
     /* Specifies a test result namespace to search for */
     @Json(name = "namespace")
