@@ -35,6 +35,7 @@ Supported test frameworks :
 ## What's new in 2.0.0?
 
 - Test run tags and links: `testRunTags` / `TMS_TEST_RUN_TAGS`, `testRunLinks` / `TMS_TEST_RUN_LINKS`. Applied on create and merged early into an existing run. See [docs/test-run-tags-links.md](docs/test-run-tags-links.md).
+- Autotest layer (test pyramid): `@Layer` / `TestLayers`, `TestItContext.layer`. See [docs/autotest-layer.md](docs/autotest-layer.md).
 - Documented test run link types: `Related`, `BlockedBy`, `Defect`, `Issue`, `Requirement`, `Repository`.
 
 ### How to run 1.0+ locally?

@@ -17,6 +17,7 @@ package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.CustomAttributeOptionApiResult
 import ru.testit.kotlin.adaptersapi.models.CustomAttributeType
+import ru.testit.kotlin.adaptersapi.models.ProjectShortestApiResult
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -24,6 +25,8 @@ import com.squareup.moshi.JsonClass
 /**
  * 
  *
+ * @param workItemUsage Projects where attribute is used in work items
+ * @param testPlanUsage Projects where attribute is used in test plans
  * @param id Unique ID of the attribute
  * @param options Collection of the attribute options   Available for attributes of type `options` and `multiple options` only
  * @param type Type of the attribute
@@ -39,7 +42,15 @@ import com.squareup.moshi.JsonClass
  */
 
 
-data class CustomAttributeApiResult (
+data class CustomAttributeSearchApiResult (
+
+    /* Projects where attribute is used in work items */
+    @Json(name = "workItemUsage")
+    val workItemUsage: kotlin.collections.List<ProjectShortestApiResult>,
+
+    /* Projects where attribute is used in test plans */
+    @Json(name = "testPlanUsage")
+    val testPlanUsage: kotlin.collections.List<ProjectShortestApiResult>,
 
     /* Unique ID of the attribute */
     @Json(name = "id")
