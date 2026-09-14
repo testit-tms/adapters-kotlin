@@ -87,6 +87,7 @@ fun TestCase.setContext(value: TestItContext) {
         value.uuid = if (value.uuid != null) value.uuid else context.uuid
         value.externalId = if (value.externalId != null) value.externalId else context.externalId
         value.links = if (value.links != null) value.links else context.links
+        value.workItemId = if (value.workItemId != null) value.workItemId else context.workItemId
         value.workItemIds = if (value.workItemIds != null) value.workItemIds else context.workItemIds
         value.attachments = if (value.attachments != null) value.attachments else context.attachments
         value.name = if (value.name != null) value.name else context.name
