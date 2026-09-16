@@ -105,7 +105,7 @@ curl -v http://127.0.0.1:49152/wait-completion?testRunId=${{ env.TMS_TEST_RUN_ID
 5. You can read the sync-storage logs from the service.log file.
 
 #### 🚀 Warning
-- If value from @WorkItemIds annotation not found in TMS then test result will NOT be uploaded.
+- If value from @WorkItemId annotation not found in TMS then test result will NOT be uploaded.
 
 
 ## Metadata of autotest
@@ -117,7 +117,8 @@ Description of metadata:
 
 * `externalId` - unique internal autotest ID (used in Test IT)
 * `links` - links listed in the autotest card
-* `workItemIds` - a value that links autotests with manual tests. Receives the array of manual tests' IDs
+* `workItemId` - a value that links an autotest with a manual test. Receives a single globalId
+* `workItemIds` - deprecated, use `workItemId` instead
 * `attachments` - autotests attachments list
 * `name` - internal autotest name (used in Test IT)
 * `title` - autotest name specified in the autotest card. If not specified, the name from the displayName method is used
@@ -135,6 +136,7 @@ data class TestItContext (
     var uuid: String? = null,
     var externalId: String? = null,
     var links: MutableList<LinkItem>? = null,
+    var workItemId: String? = null,
     var workItemIds: MutableList<String>? = null,
     var attachments: MutableList<String>? = null,
     var name: String? = null,

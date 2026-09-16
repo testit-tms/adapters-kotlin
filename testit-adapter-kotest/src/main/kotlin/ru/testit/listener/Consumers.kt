@@ -40,7 +40,7 @@ object Consumers {
         return Consumer<TestResultCommon> { result: TestResultCommon ->
             result.externalId = context.externalId ?: result.externalId
             result.description = context.description ?: result.description
-            result.workItemIds = context.workItemIds ?: result.workItemIds
+            result.workItemIds = context.resolvedWorkItemIds() ?: result.workItemIds
             result.name = context.name ?: result.name
             result.linkItems = context.links ?: result.linkItems
             result.title = context.title ?: result.title
