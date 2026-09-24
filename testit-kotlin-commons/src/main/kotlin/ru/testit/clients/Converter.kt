@@ -414,8 +414,8 @@ class Converter {
             return UpdateEmptyTestRunApiModel(
                 id = this.id,
                 name = name,
-                description = null,
-                launchSource = null,
+                description = this.description,
+                launchSource = this.launchSource,
                 attachments = this.attachments.stream().map { attachment: AttachmentApiResult ->
                     AssignAttachmentApiModel(id = attachment.id)
                 }.collect(Collectors.toList()),

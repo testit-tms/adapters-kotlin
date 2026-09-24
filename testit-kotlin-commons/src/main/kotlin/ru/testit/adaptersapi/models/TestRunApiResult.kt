@@ -33,6 +33,8 @@ import com.squareup.moshi.JsonClass
  * @param attachments Collection of attachments related to the test run
  * @param links Collection of links related to the test run
  * @param tags Collection of tags associated with the test run
+ * @param description Test run description (Keep on OpenAPI regen: needed for merge-on-update)
+ * @param launchSource Test run launch source (Keep on OpenAPI regen: needed for merge-on-update)
  */
 
 
@@ -65,7 +67,14 @@ data class TestRunApiResult (
 
     /* Collection of tags associated with the test run */
     @Json(name = "tags")
-    val tags: kotlin.collections.List<kotlin.String>
+    val tags: kotlin.collections.List<kotlin.String>,
+
+    /* Keep on OpenAPI regen: required so merge-on-update does not wipe these fields. */
+    @Json(name = "description")
+    val description: kotlin.String? = null,
+
+    @Json(name = "launchSource")
+    val launchSource: kotlin.String? = null
 
 ) {
 

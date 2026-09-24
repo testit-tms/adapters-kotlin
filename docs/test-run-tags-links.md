@@ -68,6 +68,13 @@ If `type` is omitted or unknown, the adapter uses `Related`.
 - Existing UI / API tags and links are **kept**
 - Configured items are **added**
 - Duplicates skipped: same tag string; same link `url`
+- Existing attachments, `description` and `launchSource` are copied into the update body so they are not wiped
+
+### TMS 5.8 note
+
+`GET /adapters/testRuns/{id}` returns empty `links`/`attachments` and omits `description`/`launchSource`.
+`TmsApiClient.getTestRun` therefore uses `GET /api/v2/testRuns/{id}` until the adapters endpoint is fixed in cloud.
+Extra v2-only fields (e.g. `testResults`) are ignored when mapping to `TestRunApiResult`.
 
 ## CI example
 

@@ -109,11 +109,12 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
         val mergedTags = TestRunMetadataParser.mergeTags(testRun.tags, clientConfiguration.testRunTags)
         val mergedLinks = TestRunMetadataParser.mergeUpdateLinks(existingLinks, configuredLinks)
 
+        // Copy description/launchSource/attachments from GET so adapters PUT does not wipe them.
         val model = UpdateEmptyTestRunApiModel(
             id = testRun.id,
             name = if (nameChanged) clientConfiguration.testRunName else testRun.name,
-            description = null,
-            launchSource = null,
+            description = testRun.description,
+            launchSource = testRun.launchSource,
             attachments = testRun.attachments.map { AssignAttachmentApiModel(id = it.id) },
             links = mergedLinks,
             tags = mergedTags,
@@ -248,7 +249,8 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
 
     @Synchronized
     override fun getTestRun(uuid: String): TestRunApiResult {
-        return testRunsApi.adaptersTestRunsIdGet(UUID.fromString(uuid))
+        // TMS 5.8: adapters GET omits description/launchSource and returns empty links/attachments.
+        return testRunsApi.getTestRunByIdV2(UUID.fromString(uuid))
     }
 
     @Synchronized
