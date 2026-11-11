@@ -16,7 +16,7 @@
 package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.DateTimeRangeSelectorModel
-import ru.testit.kotlin.adaptersapi.models.Int32RangeSelectorModel
+import ru.testit.kotlin.adaptersapi.models.Int64RangeSelectorModel
 import ru.testit.kotlin.adaptersapi.models.ProjectTypeModel
 
 import com.squareup.moshi.Json
@@ -55,19 +55,19 @@ data class ProjectsFilterModel (
 
     /* Specifies a project range of test cases count to search for */
     @Json(name = "testCasesCount")
-    val testCasesCount: Int32RangeSelectorModel? = null,
+    val testCasesCount: Int64RangeSelectorModel? = null,
 
     /* Specifies a project range of checklists count to search for */
     @Json(name = "checklistsCount")
-    val checklistsCount: Int32RangeSelectorModel? = null,
+    val checklistsCount: Int64RangeSelectorModel? = null,
 
     /* Specifies a project range of shared steps count to search for */
     @Json(name = "sharedStepsCount")
-    val sharedStepsCount: Int32RangeSelectorModel? = null,
+    val sharedStepsCount: Int64RangeSelectorModel? = null,
 
     /* Specifies a project range of autotests count to search for */
     @Json(name = "autotestsCount")
-    val autotestsCount: Int32RangeSelectorModel? = null,
+    val autotestsCount: Int64RangeSelectorModel? = null,
 
     /* Specifies a project global IDs to search for */
     @Json(name = "globalIds")

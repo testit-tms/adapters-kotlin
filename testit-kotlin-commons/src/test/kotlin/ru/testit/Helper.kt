@@ -296,7 +296,6 @@ class Helper {
 
             val label = LabelApiModel(
                 name = LABEL_NAME,
-                globalId = 0L,
             )
             labels.add(label)
 

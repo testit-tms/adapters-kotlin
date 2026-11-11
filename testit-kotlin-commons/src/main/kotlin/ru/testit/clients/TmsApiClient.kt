@@ -250,7 +250,7 @@ class TmsApiClient(private val clientConfiguration: ClientConfiguration) : ru.te
     @Synchronized
     override fun getTestRun(uuid: String): TestRunApiResult {
         // TMS 5.8: adapters GET omits description/launchSource and returns empty links/attachments.
-        return testRunsApi.getTestRunByIdV2(UUID.fromString(uuid))
+        return testRunsApi.adaptersTestRunsIdGet(UUID.fromString(uuid))
     }
 
     @Synchronized

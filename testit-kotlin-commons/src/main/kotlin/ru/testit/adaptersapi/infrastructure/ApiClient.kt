@@ -57,7 +57,7 @@ open class ApiClient(val baseUrl: String, val client: Call.Factory = defaultClie
         var username: String? = null
         var password: String? = null
         var accessToken: String? = null
-        const val baseUrlKey: String = "ru.testit.kotlin.adaptersapi.baseUrl"
+        const val baseUrlKey: String = "ru.testit.kotlin.client.baseUrl"
 
         @JvmStatic
         val defaultClient: OkHttpClient by lazy {

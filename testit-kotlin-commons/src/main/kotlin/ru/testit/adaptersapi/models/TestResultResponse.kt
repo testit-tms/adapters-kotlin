@@ -33,6 +33,7 @@ import com.squareup.moshi.JsonClass
  * @param id 
  * @param failureClassIds 
  * @param configurationId 
+ * @param testPointId 
  * @param testRunId 
  * @param stepComments 
  * @param outcome 
@@ -65,6 +66,9 @@ data class TestResultResponse (
 
     @Json(name = "configurationId")
     val configurationId: java.util.UUID,
+
+    @Json(name = "testPointId")
+    val testPointId: java.util.UUID,
 
     @Json(name = "testRunId")
     val testRunId: java.util.UUID,

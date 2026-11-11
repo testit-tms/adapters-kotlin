@@ -17,6 +17,7 @@ package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.AutoTestStepApiResult
 import ru.testit.kotlin.adaptersapi.models.LabelApiResult
+import ru.testit.kotlin.adaptersapi.models.LayerApiResult
 import ru.testit.kotlin.adaptersapi.models.LinkApiResult
 
 import com.squareup.moshi.Json
@@ -39,6 +40,7 @@ import com.squareup.moshi.JsonClass
  * @param title 
  * @param description 
  * @param externalKey 
+ * @param layer Model of auto test layer for use in responses.
  * @param links 
  * @param labels 
  * @param tags 
@@ -88,6 +90,10 @@ data class AutoTestApiResult (
 
     @Json(name = "externalKey")
     val externalKey: kotlin.String? = null,
+
+    /* Model of auto test layer for use in responses. */
+    @Json(name = "layer")
+    val layer: LayerApiResult? = null,
 
     @Json(name = "links")
     val links: kotlin.collections.List<LinkApiResult>? = null,

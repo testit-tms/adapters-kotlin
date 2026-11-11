@@ -16,6 +16,7 @@
 package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.AttachmentModel
+import ru.testit.kotlin.adaptersapi.models.AutoTestCaseApiModel
 import ru.testit.kotlin.adaptersapi.models.AutoTestModel
 import ru.testit.kotlin.adaptersapi.models.IterationModel
 import ru.testit.kotlin.adaptersapi.models.LinkModel
@@ -51,6 +52,7 @@ import com.squareup.moshi.JsonClass
  * @param postconditionSteps Set of postcondition steps that are executed after completing the main steps
  * @param iterations Associated iterations linked to the work item
  * @param autoTests Automated tests associated with the work item
+ * @param autoTestCases Set of automated test cases linked to the work item
  * @param attachments Files attached to the work item
  * @param links Set of links related to the work item
  * @param parameters Set of parameters related to the work item
@@ -135,6 +137,10 @@ data class WorkItemApiResult (
     /* Automated tests associated with the work item */
     @Json(name = "autoTests")
     val autoTests: kotlin.collections.List<AutoTestModel>,
+
+    /* Set of automated test cases linked to the work item */
+    @Json(name = "autoTestCases")
+    val autoTestCases: kotlin.collections.List<AutoTestCaseApiModel>,
 
     /* Files attached to the work item */
     @Json(name = "attachments")

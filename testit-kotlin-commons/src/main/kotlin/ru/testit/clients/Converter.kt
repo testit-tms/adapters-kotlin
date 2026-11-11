@@ -328,10 +328,10 @@ class Converter {
         }
 
         private fun labelsConvert(labels: List<LabelApiResult>): List<LabelApiModel> =
-            labels.map { LabelApiModel(name = it.name, globalId = it.globalId) }
+            labels.map { LabelApiModel(name = it.name) }
 
         private fun labelsPostConvert(labels: List<Label>): List<LabelApiModel> =
-            labels.map { LabelApiModel(name = it.name!!, globalId = 0L) }
+            labels.map { LabelApiModel(name = it.name!!) }
 
         private fun dateToOffsetDateTime(time: Long): OffsetDateTime {
             val date = Date(time)

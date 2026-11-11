@@ -22,7 +22,7 @@ import com.squareup.moshi.JsonClass
 /**
  * 
  *
- * Values: string,datetime,options,user,multipleOptions,checkbox
+ * Values: string,datetime,options,user,multipleOptions,checkbox,numeric
  */
 
 @JsonClass(generateAdapter = false)
@@ -44,7 +44,10 @@ enum class CustomAttributeType(val value: kotlin.String) {
     multipleOptions("multipleOptions"),
 
     @Json(name = "checkbox")
-    checkbox("checkbox");
+    checkbox("checkbox"),
+
+    @Json(name = "numeric")
+    numeric("numeric");
 
     /**
      * Override [toString()] to avoid using the enum variable name as the value, and instead use

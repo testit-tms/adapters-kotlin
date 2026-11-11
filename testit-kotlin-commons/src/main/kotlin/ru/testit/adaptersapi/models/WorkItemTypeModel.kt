@@ -22,7 +22,7 @@ import com.squareup.moshi.JsonClass
 /**
  * 
  *
- * Values: TestCases,CheckLists,SharedSteps
+ * Values: TestCases,CheckLists,SharedSteps,AutoTestCases
  */
 
 @JsonClass(generateAdapter = false)
@@ -35,7 +35,10 @@ enum class WorkItemTypeModel(val value: kotlin.String) {
     CheckLists("CheckLists"),
 
     @Json(name = "SharedSteps")
-    SharedSteps("SharedSteps");
+    SharedSteps("SharedSteps"),
+
+    @Json(name = "AutoTestCases")
+    AutoTestCases("AutoTestCases");
 
     /**
      * Override [toString()] to avoid using the enum variable name as the value, and instead use

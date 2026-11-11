@@ -16,6 +16,7 @@
 package ru.testit.kotlin.adaptersapi.models
 
 import ru.testit.kotlin.adaptersapi.models.Int32RangeSelectorModel
+import ru.testit.kotlin.adaptersapi.models.LayerSource
 import ru.testit.kotlin.adaptersapi.models.WorkItemPriorityModel
 import ru.testit.kotlin.adaptersapi.models.WorkItemSourceTypeModel
 import ru.testit.kotlin.adaptersapi.models.WorkItemStates
@@ -46,6 +47,9 @@ import com.squareup.moshi.JsonClass
  * @param tags Collection of tags
  * @param excludeTags Collection of tags to exclude
  * @param autoTestIds Collection of identifiers of linked autotests
+ * @param layers Specifies auto test case layers to search for
+ * @param layerSources Specifies list of auto test case layer sources to search for
+ * @param externalId External identifier of the work item
  */
 
 
@@ -125,7 +129,19 @@ data class WorkItemFilterApiModel (
 
     /* Collection of identifiers of linked autotests */
     @Json(name = "autoTestIds")
-    val autoTestIds: kotlin.collections.Set<java.util.UUID>? = null
+    val autoTestIds: kotlin.collections.Set<java.util.UUID>? = null,
+
+    /* Specifies auto test case layers to search for */
+    @Json(name = "layers")
+    val layers: kotlin.collections.Set<kotlin.String>? = null,
+
+    /* Specifies list of auto test case layer sources to search for */
+    @Json(name = "layerSources")
+    val layerSources: kotlin.collections.Set<LayerSource>? = null,
+
+    /* External identifier of the work item */
+    @Json(name = "externalId")
+    val externalId: kotlin.String? = null
 
 ) {
 

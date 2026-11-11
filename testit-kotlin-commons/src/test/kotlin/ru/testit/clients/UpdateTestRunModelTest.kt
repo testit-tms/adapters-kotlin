@@ -118,6 +118,7 @@ class UpdateTestRunModelTest {
         return TestRunApiResult(
             id = UUID.fromString("5819479d-e38b-40d0-9e35-c5b2dab50158"),
             name = "Old",
+            projectId = UUID.fromString("a1111111-e38b-40d0-9e35-c5b2dab50158"),
             stateName = TestRunState.InProgress,
             status = TestStatusApiResult(
                 id = UUID.fromString("bfab6f14-7b65-4270-86ca-4adb9df741bd"),
