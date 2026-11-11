@@ -14,6 +14,7 @@ data class TestResultCommon(
     var spaceName: String = "",
     var labels: MutableList<Label> = mutableListOf(),
     var tags: MutableList<String> = mutableListOf(),
+    var layer: String? = null,
     var linkItems: MutableList<LinkItem> = mutableListOf(),
     var resultLinks: MutableList<LinkItem> = mutableListOf(),
     var attachments: MutableList<String> = mutableListOf(),

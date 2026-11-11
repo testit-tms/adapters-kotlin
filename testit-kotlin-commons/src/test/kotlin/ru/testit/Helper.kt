@@ -119,7 +119,8 @@ class Helper {
                 setup = emptyList(),
                 teardown = emptyList(),
                 id = UUID.fromString(TEST_UUID),
-                isFlaky = null
+                isFlaky = null,
+                resetLayer = false,
             )
             return model
         }

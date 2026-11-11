@@ -82,6 +82,11 @@ companion object {
         return if (annotation != null) setParameters(annotation.value, parameters) else atomicTest.name
     }
 
+    fun extractLayer(atomicTest: Method, parameters: Map<String, String>): String? {
+        val annotation = atomicTest.getAnnotation(Layer::class.java) ?: return null
+        return setParameters(annotation.value, parameters).takeIf { it.isNotBlank() }
+    }
+
     fun toIndentedString(o: Any?): String {
         return o?.toString()?.replace("\n", "\n    ") ?: "null"
 //    return if (o == null) "null" else o.toString().replace("\n", "\n    ")

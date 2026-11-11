@@ -17,7 +17,7 @@ The repository contains new versions of adaptors for Kotlin test frameworks.
 
 1. For current versions, see the releases tab. 
 2. Starting with 5.2, we have added a TMS postscript, which means that the utility is compatible with a specific enterprise version. 
-3. If you are in doubt about which version to use, check with the support staff. support@yoonion.ru
+3. If you are in doubt about which version to use, check with the support staff: support@testit.software or https://help.testit.software/help
 
 Supported test frameworks :
  1. [Kotest](https://kotest.io/docs/framework/framework.html)
@@ -35,6 +35,7 @@ Supported test frameworks :
 ## What's new in 2.0.0?
 
 - Test run tags and links: `testRunTags` / `TMS_TEST_RUN_TAGS`, `testRunLinks` / `TMS_TEST_RUN_LINKS`. Applied on create and merged early into an existing run. See [docs/test-run-tags-links.md](docs/test-run-tags-links.md).
+- Autotest layer (test pyramid): `@Layer` / `TestLayers`, `TestItContext.layer`. See [docs/autotest-layer.md](docs/autotest-layer.md).
 - Documented test run link types: `Related`, `BlockedBy`, `Defect`, `Issue`, `Requirement`, `Repository`.
 
 ### How to run 1.0+ locally?
@@ -104,7 +105,7 @@ curl -v http://127.0.0.1:49152/wait-completion?testRunId=${{ env.TMS_TEST_RUN_ID
 5. You can read the sync-storage logs from the service.log file.
 
 #### 🚀 Warning
-- If value from @WorkItemIds annotation not found in TMS then test result will NOT be uploaded.
+- If value from @WorkItemId annotation not found in TMS then test result will NOT be uploaded.
 
 
 ## Metadata of autotest
@@ -116,7 +117,8 @@ Description of metadata:
 
 * `externalId` - unique internal autotest ID (used in Test IT)
 * `links` - links listed in the autotest card
-* `workItemIds` - a value that links autotests with manual tests. Receives the array of manual tests' IDs
+* `workItemId` - a value that links an autotest with a manual test. Receives a single globalId
+* `workItemIds` - deprecated, use `workItemId` instead
 * `attachments` - autotests attachments list
 * `name` - internal autotest name (used in Test IT)
 * `title` - autotest name specified in the autotest card. If not specified, the name from the displayName method is used
@@ -134,6 +136,7 @@ data class TestItContext (
     var uuid: String? = null,
     var externalId: String? = null,
     var links: MutableList<LinkItem>? = null,
+    var workItemId: String? = null,
     var workItemIds: MutableList<String>? = null,
     var attachments: MutableList<String>? = null,
     var name: String? = null,

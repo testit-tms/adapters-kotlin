@@ -87,6 +87,7 @@ fun TestCase.setContext(value: TestItContext) {
         value.uuid = if (value.uuid != null) value.uuid else context.uuid
         value.externalId = if (value.externalId != null) value.externalId else context.externalId
         value.links = if (value.links != null) value.links else context.links
+        value.workItemId = if (value.workItemId != null) value.workItemId else context.workItemId
         value.workItemIds = if (value.workItemIds != null) value.workItemIds else context.workItemIds
         value.attachments = if (value.attachments != null) value.attachments else context.attachments
         value.name = if (value.name != null) value.name else context.name
@@ -97,6 +98,7 @@ fun TestCase.setContext(value: TestItContext) {
         value.parameters = if (value.parameters != null) value.parameters else context.parameters
         value.labels = if (value.labels != null) value.labels else context.labels
         value.tags = if (value.tags != null) value.tags else context.tags
+        value.layer = if (value.layer != null) value.layer else context.layer
     }
     writer.context[this.name.toString()] = value
 }

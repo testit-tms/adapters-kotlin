@@ -91,6 +91,8 @@ class HttpWriter(
             try {
                 val model = apiClient.getAutoTestByExternalId(test.get().externalId!!)  ?: return
 
+                val testResult = test.get()
+
                 val beforeClass = Converter.convertFixture(container.beforeClassMethods, null)
                 val beforeEach = Converter.convertFixture(container.beforeEachTest, testUuid)
                 beforeClass.addAll(beforeEach)
@@ -104,7 +106,8 @@ class HttpWriter(
                     autoTestModel = model,
                     setup = beforeClass,
                     teardown = afterClass,
-                    isFlaky = model.isFlaky
+                    isFlaky = model.isFlaky,
+                    layer = testResult.layer,
                 )
 
                 apiClient.updateAutoTest(autoTestUpdateApiModel)
@@ -232,14 +235,16 @@ class HttpWriter(
             val autoTestUpdateApiModel = when {
                 beforeFinish != null && afterFinish != null -> {
                     Converter.autoTestModelToAutoTestUpdateApiModel(
-                        autotest, beforeFinish, afterFinish, autotest.isFlaky)
+                        autotest, beforeFinish, afterFinish, autotest.isFlaky, testResult.layer)
                 }
                 testResult.itemStatus == ItemStatus.FAILED -> {
                     Converter.autoTestModelToAutoTestUpdateApiModel(
                         autoTestModel = autotest,
                         links = Converter.convertPutLinks(testResult.linkItems),
                         externalKey = testResult.externalKey,
-                        isFlaky = autotest.isFlaky)
+                        isFlaky = autotest.isFlaky,
+                        layer = testResult.layer,
+                    )
                 }
                 else -> {
                     Converter.testResultToAutoTestPutModel(
@@ -256,7 +261,7 @@ class HttpWriter(
             if (beforeFinish != null && afterFinish != null) {
                 val created = apiClient.getAutoTestByExternalId(testResult.externalId!!)!!
                 apiClient.updateAutoTest(Converter.autoTestModelToAutoTestUpdateApiModel(
-                    created, beforeFinish, afterFinish, created.isFlaky))
+                    created, beforeFinish, afterFinish, created.isFlaky, testResult.layer))
             }
         }
 
