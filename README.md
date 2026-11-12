@@ -118,7 +118,7 @@ Description of metadata:
 * `externalId` - unique internal autotest ID (used in Test IT)
 * `links` - links listed in the autotest card
 * `workItemId` - a value that links an autotest with a manual test. Receives a single globalId
-* `workItemIds` - deprecated, use `workItemId` instead
+* `workItemIds` - links an autotest with manual tests. Receives an array of manual tests' IDs
 * `attachments` - autotests attachments list
 * `name` - internal autotest name (used in Test IT)
 * `title` - autotest name specified in the autotest card. If not specified, the name from the displayName method is used
