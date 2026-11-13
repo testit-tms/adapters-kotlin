@@ -76,6 +76,8 @@ data class AdapterConfig(
         sb.append("    mode: ").append(this.mode).append("\n")
         sb.append("    automaticCreationTestCases: ").append(this.automaticCreationTestCases).append("\n")
         sb.append("    tmsIntegration: ").append(this.tmsIntegration).append("\n")
+        sb.append("    importRealtime: ").append(this.importRealtime).append("\n")
+        sb.append("    syncStoragePort: ").append(this.syncStoragePort).append("\n")
         sb.append("}")
         return sb.toString()
     }
